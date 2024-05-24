@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/onboard": "pages/onboard.js",
   "/dashboard": "pages/dashboard.js",
-  "/": "pages/index.js",
-  "/companyProfile": "pages/companyProfile.js"
+  "/profile": "pages/profile.js"
 }

@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
-import Select from 'react-select';
 import {
-  COMPANY_SIZES,
   COUNTRIES,
   CURRENT_JOB_STATUS,
   GENDERS,
-  INDUSTRIES,
   SALARY_TYPES,
 } from '../utils/constants';
 import DynamicWorkExperienceForm from './DynamicWorkExperienceForm';
@@ -15,9 +12,30 @@ import toast from 'react-hot-toast';
 import { useApiCall } from '../context/apiCall';
 import DynamicSkillsForm from './DynamicSkillsForm';
 import DynamicLanguagesForm from './DynamicLanguagesForm';
+import { useModal } from '../context/modal';
 
-const ResumeForm = () => {
+const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
   const { apiData, addResumeApi } = useApiCall();
+  const { isModalOpen, toggleModal } = useModal();
+
+  const [formValue, setFormValue] = useState({
+    full_name: '',
+    email: '',
+    gender: '',
+    date_of_birth: '',
+    phone_number: '',
+    address_1: '',
+    address_2: '',
+    city: '',
+    postcode: '',
+    state: '',
+    country: '',
+    current_job_status: '',
+    preferred_job: '',
+    expected_min_salary: '',
+    expected_max_salary: '',
+    expected_salary_type: '',
+  });
 
   const [arrayElements, setArrayElements] = useState({
     workExperience: [],
@@ -68,21 +86,14 @@ const ResumeForm = () => {
   useEffect(() => {
     if (apiData.resume.data?.length !== 0) {
       const resumeData = apiData.resume.data;
-      for (const key in resumeData) {
-        if (formConfig().resume.hasOwnProperty(key)) {
-          const element = formConfig().resume[key];
-          if (element?.type === 'checkbox') {
-            if (resumeData[key]) {
-              element.checked = true;
-            } else {
-              element.checked = false;
-            }
-          } else {
-            element.value = resumeData[key];
-          }
+      const updatedFormValue = { ...formValue };
+      Object.keys(formValue).forEach((key) => {
+        if (resumeData.hasOwnProperty(key)) {
+          updatedFormValue[key] = resumeData[key] || '';
         }
-      }
+      });
 
+      setFormValue(updatedFormValue);
       setArrayElements((prevState) => ({
         ...prevState,
         workExperience: resumeData?.work_experience || [],
@@ -92,59 +103,6 @@ const ResumeForm = () => {
       }));
     }
   }, [apiData.resume?.data]);
-
-  const formConfig = () => {
-    const forms = {
-      resume: {
-        full_name: document.getElementById('input-full-name'),
-        email: document.getElementById('input-email'),
-        gender: document.getElementById('select-gender'),
-        date_of_birth: document.getElementById('input-date-of-birth'),
-        phone_number: document.getElementById('input-phone-number'),
-        address_1: document.getElementById('input-address-1'),
-        address_2: document.getElementById('input-address-2'),
-        city: document.getElementById('input-city'),
-        postcode: document.getElementById('input-postcode'),
-        state: document.getElementById('input-state'),
-        country: document.getElementById('select-country'),
-        current_job_status: document.getElementById(
-          'select-current-job-status'
-        ),
-        preferred_job: document.getElementById('input-preferred-job'),
-        expected_min_salary: document.getElementById(
-          'input-expected-min-salary'
-        ),
-        expected_max_salary: document.getElementById(
-          'input-expected-max-salary'
-        ),
-        expected_salary_type: document.getElementById(
-          'select-expected-salary-type'
-        ),
-      },
-    };
-
-    return forms;
-  };
-
-  const getKeyValue = () => {
-    const keyValue = {};
-    for (const key in formConfig().resume) {
-      const element = formConfig().resume[key];
-      if (element?.type === 'checkbox') {
-        keyValue[key] = element.checked;
-      } else if (element?.type === 'number') {
-        if (element.value == '') {
-          keyValue[key] = 0;
-        } else {
-          keyValue[key] = element.value;
-        }
-      } else {
-        keyValue[key] = element.value;
-      }
-    }
-
-    return keyValue;
-  };
 
   const onSubmitResume = async (event, keyName) => {
     event.preventDefault();
@@ -160,12 +118,17 @@ const ResumeForm = () => {
       },
     }));
 
-    const addData = getKeyValue();
+    const addData = formValue;
     addData.work_experience = arrayElements.workExperience;
     addData.education_background = arrayElements.educationBackground;
     addData.skills = arrayElements.skills;
     addData.languages = arrayElements.languages;
     addData.uid = apiData.resume.data?.uid ?? null;
+
+    // Remove undefined properties
+    Object.keys(addData).forEach(
+      (key) => addData[key] === undefined && delete addData[key]
+    );
 
     var success = false;
 
@@ -190,65 +153,268 @@ const ResumeForm = () => {
 
     if (success) {
       toast.success('Saved!');
+      if (section && onSuccessFunction) {
+        onSuccessFunction();
+      } else {
+        toggleModal('editResume');
+      }
     }
   };
 
-  return (
-    <div class="accordion" id="accordionPanelsStayOpenExample">
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseOne"
-            aria-expanded="true"
-            aria-controls="panelsStayOpen-collapseOne"
+  const handleChange = (field) => (event) => {
+    const { value } = event.target;
+    setFormValue((prevFormValue) => ({
+      ...prevFormValue,
+      [field]: value,
+    }));
+  };
+
+  const configForm = {
+    personalDetails: {
+      title: 'Personal Info',
+      formView: (
+        <>
+          <form
+            onSubmit={(event) =>
+              onSubmitResume(event, buttonConfig.profile.keyName)
+            }
           >
-            <strong>Personal Details</strong>
-          </button>
-        </h2>
-        <div
-          id="panelsStayOpen-collapseOne"
-          class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingOne"
-        >
-          <div class="accordion-body">
-            <form
-              onSubmit={(event) =>
-                onSubmitResume(event, buttonConfig.profile.keyName)
-              }
-            >
-              <div class="col mb-3">
-                <label htmlFor="input-full-name" class="form-label">
-                  Full Name
+            <div class="col mb-3">
+              <label htmlFor="input-full-name" class="form-label">
+                Full Name
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="input-full-name"
+                value={formValue.full_name}
+                onChange={handleChange('full_name')}
+                required
+              />
+            </div>
+            <div class="row mb-3 g-2">
+              <div class="col-md">
+                <label htmlFor="input-email" class="form-label">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="input-email"
+                  value={formValue.email}
+                  onChange={handleChange('email')}
+                  required
+                />
+              </div>
+              <div class="col-md-4">
+                <label htmlFor="select-gender" class="form-label">
+                  Gender
+                </label>
+                <select
+                  class="form-select"
+                  id="select-gender"
+                  required
+                  value={formValue.gender}
+                  onChange={handleChange('gender')}
+                >
+                  {GENDERS.map((item, index) => {
+                    return (
+                      <option value={item.value} key={index}>
+                        {item.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+            <div class="row mb-3 g-2">
+              <div class="col-md-4">
+                <label htmlFor="input-date-of-birth" class="form-label">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="input-date-of-birth"
+                  value={formValue.date_of_birth}
+                  onChange={handleChange('date_of_birth')}
+                  required
+                />
+              </div>
+              <div class="col-md">
+                <label htmlFor="input-phone-number" class="form-label">
+                  Phone Number
                 </label>
                 <input
                   type="text"
                   class="form-control"
-                  id="input-full-name"
+                  id="input-phone-number"
+                  value={formValue.phone_number}
+                  onChange={handleChange('phone_number')}
                   required
                 />
               </div>
-
-              <div class="row mb-3 g-2">
+            </div>
+            <div class="mb-3 row g-2">
+              <label htmlFor="input-address-1" class="form-label">
+                Address
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="input-address-1"
+                value={formValue.address_1}
+                onChange={handleChange('address_1')}
+                required
+                placeholder="Address 1"
+              />
+              <input
+                type="text"
+                class="form-control"
+                id="input-address-2"
+                value={formValue.address_2}
+                onChange={handleChange('address_2')}
+                placeholder="Address 2"
+              />
+              <div class="col-md-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="input-city"
+                  value={formValue.city}
+                  onChange={handleChange('city')}
+                  placeholder="City"
+                />
+              </div>
+              <div class="col-md-4">
+                <input
+                  type="text"
+                  class="form-control col-md-4"
+                  id="input-postcode"
+                  value={formValue.postcode}
+                  onChange={handleChange('postcode')}
+                  placeholder="Postcode"
+                />
+              </div>
+              <div class="col-md">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="input-state"
+                  value={formValue.state}
+                  onChange={handleChange('state')}
+                  placeholder="State"
+                />
+              </div>
+              <select
+                class="form-select"
+                id="select-country"
+                value={formValue.country}
+                onChange={handleChange('country')}
+                required
+              >
+                {COUNTRIES.map((item, index) => {
+                  return (
+                    <option value={item.value} key={index}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <div class="d-flex justify-content-end">
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save Personal Info"
+                btnLoading={buttonConfig.profile.submit.isLoading}
+              />
+            </div>
+          </form>
+        </>
+      ),
+    },
+    jobDetails: {
+      title: 'Job Details',
+      formView: (
+        <>
+          <form
+            onSubmit={(event) =>
+              onSubmitResume(event, buttonConfig.job.keyName)
+            }
+          >
+            <div class="col mb-3">
+              <label htmlFor="select-current-job-status" class="form-label">
+                Current Job Status
+              </label>
+              <select
+                class="form-select"
+                id="select-current-job-status"
+                value={formValue.current_job_status}
+                onChange={handleChange('current_job_status')}
+                required
+              >
+                {CURRENT_JOB_STATUS.map((item, index) => {
+                  return (
+                    <option value={item.value} key={index}>
+                      {item.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <div class="col mb-3">
+              <label htmlFor="input-preferred-job" class="form-label">
+                Preferred Job
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="input-preferred-job"
+                value={formValue.preferred_job}
+                onChange={handleChange('preferred_job')}
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label htmlFor="input-expected-min-salary" class="form-label">
+                Expected Salary
+              </label>
+              <div class="row g-2">
                 <div class="col-md">
-                  <label htmlFor="input-email" class="form-label">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="input-email"
-                    required
-                  />
+                  <div class="input-group">
+                    <span class="input-group-text">RM</span>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="input-expected-min-salary"
+                      value={formValue.expected_min_salary}
+                      onChange={handleChange('expected_min_salary')}
+                      placeholder="min"
+                    />
+                  </div>
                 </div>
-                <div class="col-md-4">
-                  <label htmlFor="select-gender" class="form-label">
-                    Gender
-                  </label>
-                  <select class="form-select" id="select-gender" required>
-                    {GENDERS.map((item, index) => {
+                <div class="col-md">
+                  <div class="input-group">
+                    <span class="input-group-text">RM</span>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="input-expected-max-salary"
+                      value={formValue.expected_max_salary}
+                      onChange={handleChange('expected_max_salary')}
+                      placeholder="max"
+                    />
+                  </div>
+                </div>
+                <div class="col-md">
+                  <select
+                    class="form-select"
+                    id="select-expected-salary-type"
+                    value={formValue.expected_salary_type}
+                    onChange={handleChange('expected_salary_type')}
+                  >
+                    {SALARY_TYPES.map((item, index) => {
                       return (
                         <option value={item.value} key={index}>
                           {item.name}
@@ -258,361 +424,153 @@ const ResumeForm = () => {
                   </select>
                 </div>
               </div>
-              <div class="row mb-3 g-2">
-                <div class="col-md-4">
-                  <label htmlFor="input-date-of-birth" class="form-label">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    class="form-control"
-                    id="input-date-of-birth"
-                    required
-                  />
-                </div>
-                <div class="col-md">
-                  <label htmlFor="input-phone-number" class="form-label">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="input-phone-number"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="mb-3 row g-2">
-                <label htmlFor="input-address-1" class="form-label">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="input-address-1"
-                  required
-                  placeholder="Address 1"
-                />
-                <input
-                  type="text"
-                  class="form-control"
-                  id="input-address-2"
-                  placeholder="Address 2"
-                />
-                <div class="col-md-4">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="input-city"
-                    placeholder="City"
-                  />
-                </div>
-                <div class="col-md-4">
-                  <input
-                    type="text"
-                    class="form-control col-md-4"
-                    id="input-postcode"
-                    placeholder="Postcode"
-                  />
-                </div>
-                <div class="col-md">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="input-state"
-                    placeholder="State"
-                  />
-                </div>
-                <select class="form-select" id="select-country" required>
-                  {COUNTRIES.map((item, index) => {
-                    return (
-                      <option value={item.value} key={index}>
-                        {item.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <div class="d-flex justify-content-end">
-                <GlobalButton
-                  btnType="submit"
-                  btnClass="btn btn-primary btn-lg"
-                  btnTitle="Save Personal Details"
-                  btnLoading={buttonConfig.profile.submit.isLoading}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseTwo"
-            aria-expanded="false"
-            aria-controls="panelsStayOpen-collapseTwo"
-          >
-            <strong>Job Details</strong>
-          </button>
-        </h2>
-        <div
-          id="panelsStayOpen-collapseTwo"
-          class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingTwo"
-        >
-          <div class="accordion-body">
-            <form
-              onSubmit={(event) =>
-                onSubmitResume(event, buttonConfig.job.keyName)
-              }
-            >
-              <div class="col mb-3">
-                <label htmlFor="select-current-job-status" class="form-label">
-                  Current Job Status
-                </label>
-                <select
-                  class="form-select"
-                  id="select-current-job-status"
-                  required
-                >
-                  {CURRENT_JOB_STATUS.map((item, index) => {
-                    return (
-                      <option value={item.value} key={index}>
-                        {item.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-              <div class="col mb-3">
-                <label htmlFor="input-preferred-job" class="form-label">
-                  Preferred Job
-                </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="input-preferred-job"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label htmlFor="input-expected-min-salary" class="form-label">
-                  Expected Salary
-                </label>
-                <div class="row g-2">
-                  <div class="col-md">
-                    <div class="input-group">
-                      <span class="input-group-text">RM</span>
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="input-expected-min-salary"
-                        placeholder="min"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-md">
-                    <div class="input-group">
-                      <span class="input-group-text">RM</span>
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="input-expected-max-salary"
-                        placeholder="max"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-md">
-                    <select
-                      class="form-select"
-                      id="select-expected-salary-type"
-                    >
-                      {SALARY_TYPES.map((item, index) => {
-                        return (
-                          <option value={item.value} key={index}>
-                            {item.name}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="d-flex justify-content-end">
-                <GlobalButton
-                  btnType="submit"
-                  btnClass="btn btn-primary btn-lg"
-                  btnTitle="Save Job Details"
-                  btnLoading={buttonConfig.job.submit.isLoading}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseThree"
-            aria-expanded="false"
-            aria-controls="panelsStayOpen-collapseThree"
-          >
-            <strong>Work Experience</strong>
-          </button>
-        </h2>
-        <div
-          id="panelsStayOpen-collapseThree"
-          class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingThree"
-        >
-          <div class="accordion-body">
-            <form
-              onSubmit={(event) =>
-                onSubmitResume(event, buttonConfig.workExperience.keyName)
-              }
-            >
-              <DynamicWorkExperienceForm
-                arrayElements={arrayElements}
-                setArrayElements={setArrayElements}
+            </div>
+            <div class="d-flex justify-content-end">
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save Job Details"
+                btnLoading={buttonConfig.job.submit.isLoading}
               />
-              <div class="d-flex justify-content-end">
-                <GlobalButton
-                  btnType="submit"
-                  btnClass="btn btn-primary btn-lg"
-                  btnTitle="Save Work Experience"
-                  btnLoading={buttonConfig.workExperience.submit.isLoading}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingFour">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseFour"
-            aria-expanded="false"
-            aria-controls="panelsStayOpen-collapseFour"
+            </div>
+          </form>
+        </>
+      ),
+    },
+    workExperience: {
+      title: 'Work Experience',
+      formView: (
+        <>
+          <form
+            onSubmit={(event) =>
+              onSubmitResume(event, buttonConfig.workExperience.keyName)
+            }
           >
-            <strong>Education History</strong>
-          </button>
-        </h2>
-        <div
-          id="panelsStayOpen-collapseFour"
-          class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingFour"
-        >
-          <div class="accordion-body">
-            <form
-              onSubmit={(event) =>
-                onSubmitResume(event, buttonConfig.educationHistory.keyName)
-              }
-            >
-              <DynamicEducationBackgroundForm
-                arrayElements={arrayElements}
-                setArrayElements={setArrayElements}
+            <DynamicWorkExperienceForm
+              arrayElements={arrayElements}
+              setArrayElements={setArrayElements}
+            />
+            <div class="d-flex justify-content-end">
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save Work Experience"
+                btnLoading={buttonConfig.workExperience.submit.isLoading}
               />
-              <div class="d-flex justify-content-end">
-                <GlobalButton
-                  btnType="submit"
-                  btnClass="btn btn-primary btn-lg"
-                  btnTitle="Save Education History"
-                  btnLoading={buttonConfig.educationHistory.submit.isLoading}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingFive">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseFive"
-            aria-expanded="false"
-            aria-controls="panelsStayOpen-collapseFive"
+            </div>
+          </form>
+        </>
+      ),
+    },
+    educationHistory: {
+      title: 'Education History',
+      formView: (
+        <>
+          <form
+            onSubmit={(event) =>
+              onSubmitResume(event, buttonConfig.educationHistory.keyName)
+            }
           >
-            <strong>Skills</strong>
-          </button>
-        </h2>
-        <div
-          id="panelsStayOpen-collapseFive"
-          class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingFive"
-        >
-          <div class="accordion-body">
-            <form
-              onSubmit={(event) =>
-                onSubmitResume(event, buttonConfig.skills.keyName)
-              }
-            >
-              <DynamicSkillsForm
-                arrayElements={arrayElements}
-                setArrayElements={setArrayElements}
+            <DynamicEducationBackgroundForm
+              arrayElements={arrayElements}
+              setArrayElements={setArrayElements}
+            />
+            <div class="d-flex justify-content-end">
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save Education History"
+                btnLoading={buttonConfig.educationHistory.submit.isLoading}
               />
-              <div class="d-flex justify-content-end">
-                <GlobalButton
-                  btnType="submit"
-                  btnClass="btn btn-primary btn-lg"
-                  btnTitle="Save Skills"
-                  btnLoading={buttonConfig.skills.submit.isLoading}
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="panelsStayOpen-headingSix">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#panelsStayOpen-collapseSix"
-            aria-expanded="false"
-            aria-controls="panelsStayOpen-collapseSix"
+            </div>
+          </form>
+        </>
+      ),
+    },
+    skills: {
+      title: 'Skills',
+      formView: (
+        <>
+          <form
+            onSubmit={(event) =>
+              onSubmitResume(event, buttonConfig.skills.keyName)
+            }
           >
-            <strong>Languages</strong>
-          </button>
-        </h2>
-        <div
-          id="panelsStayOpen-collapseSix"
-          class="accordion-collapse collapse"
-          aria-labelledby="panelsStayOpen-headingSix"
-        >
-          <div class="accordion-body">
-            <form
-              onSubmit={(event) =>
-                onSubmitResume(event, buttonConfig.languages.keyName)
-              }
-            >
-              <DynamicLanguagesForm
-                arrayElements={arrayElements}
-                setArrayElements={setArrayElements}
+            <DynamicSkillsForm
+              arrayElements={arrayElements}
+              setArrayElements={setArrayElements}
+            />
+            <div class="d-flex justify-content-end">
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save Skills"
+                btnLoading={buttonConfig.skills.submit.isLoading}
               />
-              <div class="d-flex justify-content-end">
-                <GlobalButton
-                  btnType="submit"
-                  btnClass="btn btn-primary btn-lg"
-                  btnTitle="Save Languages"
-                  btnLoading={buttonConfig.languages.submit.isLoading}
-                />
-              </div>
-            </form>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    languages: {
+      title: 'Languages',
+      formView: (
+        <>
+          <form
+            onSubmit={(event) =>
+              onSubmitResume(event, buttonConfig.languages.keyName)
+            }
+          >
+            <DynamicLanguagesForm
+              arrayElements={arrayElements}
+              setArrayElements={setArrayElements}
+            />
+            <div class="d-flex justify-content-end">
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save Languages"
+                btnLoading={buttonConfig.languages.submit.isLoading}
+              />
+            </div>
+          </form>
+        </>
+      ),
+    },
+  };
+
+  if (section) {
+    return <div>{configForm[section]?.formView}</div>;
+  }
+
+  return (
+    <div className="accordion" id="accordionPanelsStayOpenExample">
+      {Object.values(configForm).map((item, index) => (
+        <div className="accordion-item" key={index}>
+          <h2
+            className="accordion-header"
+            id={`panelsStayOpen-heading${index}`}
+          >
+            <button
+              className="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target={`#panelsStayOpen-collapse${index}`}
+              aria-expanded="false"
+              aria-controls={`panelsStayOpen-collapse${index}`}
+            >
+              <strong>{item.title}</strong>
+            </button>
+          </h2>
+          <div
+            id={`panelsStayOpen-collapse${index}`}
+            className="accordion-collapse collapse"
+            aria-labelledby={`panelsStayOpen-heading${index}`}
+          >
+            <div className="accordion-body">{item.formView}</div>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 };

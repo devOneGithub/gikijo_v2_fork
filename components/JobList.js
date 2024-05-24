@@ -81,7 +81,7 @@ const JobList = ({ showModalOnClick = true }) => {
           {jobListData.length > 0 && (
             <GlobalButton
               btnType="button"
-              btnClass="btn btn-primary w-100"
+              btnClass="btn btn-outline-primary w-100"
               btnLoading={isLoading}
               btnOnClick={handleLoadMoreClick}
             >

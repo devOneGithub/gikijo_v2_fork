@@ -65,11 +65,11 @@ export const PAGES = {
     directory: '/application',
     description: 'Create and publish your job oppurtunities here.',
   },
-  resume: {
-    key: 'resume',
-    name: 'My Resume',
-    directory: '/resume',
-    description: 'Update your resume details here.',
+  manage_profile: {
+    key: 'manage_profile',
+    name: 'Manage Profile',
+    directory: '/manageProfile',
+    description: 'Manage your profile details here.',
   },
   company_profile: {
     key: 'company_profile',
@@ -199,7 +199,7 @@ export const JOB_POST_STATUS = [
 
 export const GENDERS = [
   { name: 'Male', value: 'male' },
-  { name: 'Femal', value: 'female' },
+  { name: 'Female', value: 'female' },
 ];
 
 export const COUNTRIES = [{ name: 'Malaysia', value: 'malaysia' }];

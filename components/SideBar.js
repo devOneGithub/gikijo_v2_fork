@@ -76,13 +76,13 @@ const Navbar = ({ children }) => {
       icon: <i class="fs-5 bi-file-earmark-arrow-up px-2"></i>,
       directory: PAGES.application.directory,
     },
-    resume: {
-      title: PAGES.resume.name,
+    manage_profile: {
+      title: PAGES.manage_profile.name,
       action: () => {
-        router.push(PAGES.resume.directory);
+        router.push(PAGES.manage_profile.directory);
       },
       icon: <i class="fs-5 bi-file-earmark-person px-2"></i>,
-      directory: PAGES.resume.directory,
+      directory: PAGES.manage_profile.directory,
     },
   };
 

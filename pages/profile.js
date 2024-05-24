@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import JobFilter from '../components/JobFilter';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import ProfileDetailsCard from '../components/ProfileDetailsCard';
 import { useApiCall } from '../context/apiCall';
 import Breadcrumb from '../components/BreadCrumb';
 import { PAGES } from '../utils/constants';
+import ProfileJobSeeker from '../components/ProfileJobSeeker';
+import ProfileEmployer from '../components/ProfileEmployer';
 
 const main = () => {
   const router = useRouter();
@@ -14,10 +14,10 @@ const main = () => {
     profileDetails: { data: null, isLoading: false },
   });
 
-  const getResumeDetails = async (uid) => {
+  const getResumeDetails = async () => {
     try {
       const data = await getResumeDetailsApi({
-        uid: uid,
+        uid: router.query.uid,
       });
 
       setMainData((prevData) => ({
@@ -32,10 +32,10 @@ const main = () => {
     }
   };
 
-  const getCompanyDetails = async (uid) => {
+  const getCompanyDetails = async () => {
     try {
       const data = await getSingleCompanyProfileApi({
-        uid: uid,
+        uid: router.query.uid,
       });
 
       setMainData((prevData) => ({
@@ -53,10 +53,10 @@ const main = () => {
   useEffect(() => {
     if (router.query?.uid && router.query?.type) {
       if (router.query.type == 'resume') {
-        getResumeDetails(router.query.uid);
+        getResumeDetails();
       }
       if (router.query.type == 'company') {
-        getCompanyDetails(router.query.uid);
+        getCompanyDetails();
       }
     }
   }, [router]);
@@ -65,11 +65,24 @@ const main = () => {
     <div className="body">
       <section class="container">
         <Breadcrumb page={PAGES.profile} />
-        <ProfileDetailsCard
-          item={mainData.profileDetails.data}
-          showBtnExternalPage={false}
-          type={router.query.type}
-        />
+        {router?.query?.type == 'emloyer' ? (
+          <ProfileEmployer
+            item={mainData.profileDetails.data}
+            showBtnExternalPage={false}
+            onSuccessFunction={getCompanyDetails}
+          />
+        ) : (
+          ''
+        )}
+        {router?.query?.type == 'resume' ? (
+          <ProfileJobSeeker
+            item={mainData.profileDetails.data}
+            showBtnExternalPage={false}
+            onSuccessFunction={getResumeDetails}
+          />
+        ) : (
+          ''
+        )}
       </section>
     </div>
   );

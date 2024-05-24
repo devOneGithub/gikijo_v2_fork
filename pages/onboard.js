@@ -13,7 +13,8 @@ import JobPostTable from '../components/JobPostTable';
 import CompanyProfileTable from '../components/CompanyProfileTable';
 
 const main = () => {
-  const { apiData, updateAccountTypeApi } = useApiCall();
+  const { apiData, updateAccountTypeApi, addResumeApi, updateOnboardingApi } =
+    useApiCall();
   const { isModalOpen, toggleModal } = useModal();
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState('getStarted');
@@ -26,6 +27,12 @@ const main = () => {
         const result = await updateAccountTypeApi({
           postData: {
             accountType: 'job_seeker',
+          },
+        });
+
+        const resultResume = await addResumeApi({
+          postData: {
+            uid: apiData.resume.data?.uid ?? null,
           },
         });
 
@@ -74,6 +81,45 @@ const main = () => {
       </div>
     );
   };
+
+  const SectionView = ({
+    title,
+    subtitle,
+    section,
+    nextSection,
+    prevSection,
+    steps,
+  }) => (
+    <div>
+      <motion.small variants={STAGGER_CHILD_VARIANTS} class="mb-0 text-muted">
+        {steps}
+      </motion.small>
+      <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
+        {title}
+      </motion.h1>
+      <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
+        {subtitle}
+      </motion.p>
+      <motion.div
+        variants={STAGGER_CHILD_VARIANTS}
+        class="lead text-muted text-start"
+      >
+        <div class="card">
+          <div class="card-body">
+            <ResumeForm
+              section={section}
+              onSuccessFunction={() => {
+                setCurrentSection(nextSection);
+              }}
+            />
+          </div>
+        </div>
+      </motion.div>
+      <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
+        {navigationSection(prevSection, nextSection)}
+      </motion.h1>
+    </div>
+  );
 
   const viewConfig = {
     getStarted: {
@@ -202,70 +248,6 @@ const main = () => {
         </div>
       ),
     },
-    createResume: {
-      view: (
-        <div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Build Your Resume
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            Let's Build Your Standout Resume
-          </motion.p>
-          <motion.div
-            variants={STAGGER_CHILD_VARIANTS}
-            class="lead text-muted text-start"
-          >
-            <ResumeForm />
-          </motion.div>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={() => {
-                setCurrentSection('applyJob');
-              }}
-            >
-              Continue <i class="bi bi-arrow-right-short"></i>
-            </GlobalButton>
-          </motion.div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('getStarted', 'applyJob')}
-          </motion.h1>
-        </div>
-      ),
-    },
-    applyJob: {
-      view: (
-        <div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Get Going!
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            Start Applying or Check Your Dashboard
-          </motion.p>
-          <motion.div
-            variants={STAGGER_CHILD_VARIANTS}
-            class="lead text-muted text-start"
-          >
-            <JobDeckCard />
-          </motion.div>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={() => {
-                setCurrentSection('completedJobSeeker');
-              }}
-            >
-              Continue <i class="bi bi-arrow-right-short"></i>
-            </GlobalButton>
-          </motion.div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('createResume', 'completedJobSeeker')}
-          </motion.h1>
-        </div>
-      ),
-    },
     completedEmployer: {
       view: (
         <div>
@@ -282,8 +264,16 @@ const main = () => {
             <GlobalButton
               btnType="button"
               btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={() => {
-                router.push(PAGES.dashboard.directory);
+              btnOnClick={async () => {
+                const result = await updateOnboardingApi({
+                  postData: {
+                    onboarding: !apiData.profile.data?.onboarding,
+                  },
+                });
+
+                if (result) {
+                  router.push(PAGES.dashboard.directory);
+                }
               }}
             >
               Go to Dashboard <i class="bi bi-arrow-right-short"></i>
@@ -295,14 +285,128 @@ const main = () => {
         </div>
       ),
     },
+    createResume: {
+      view: (
+        <SectionView
+          title="Let's Build Your Profile"
+          subtitle="Tell us a bit about yourself"
+          section="personalDetails"
+          prevSection="getStarted"
+          nextSection="jobDetails"
+          steps="1/8"
+        />
+      ),
+    },
+    jobDetails: {
+      view: (
+        <SectionView
+          title="Your Work Goals"
+          subtitle="Share what you do and what you're looking for"
+          section="jobDetails"
+          prevSection="createResume"
+          nextSection="workExperience"
+          steps="2/8"
+        />
+      ),
+    },
+    workExperience: {
+      view: (
+        <SectionView
+          title="Your Work Experience"
+          subtitle="Share your work history and achievements"
+          section="workExperience"
+          prevSection="jobDetails"
+          nextSection="educationHistory"
+          steps="3/8"
+        />
+      ),
+    },
+    educationHistory: {
+      view: (
+        <SectionView
+          title="Your Educational Background"
+          subtitle="Share your educational journey"
+          section="educationHistory"
+          prevSection="workExperience"
+          nextSection="skills"
+          steps="4/8"
+        />
+      ),
+    },
+    skills: {
+      view: (
+        <SectionView
+          title="Your Skills"
+          subtitle="Share what you're good at"
+          section="skills"
+          prevSection="educationHistory"
+          nextSection="languages"
+          steps="5/8"
+        />
+      ),
+    },
+    languages: {
+      view: (
+        <SectionView
+          title="Languages You Speak"
+          subtitle="List the languages you speak"
+          section="languages"
+          prevSection="skills"
+          nextSection="applyJob"
+          steps="6/8"
+        />
+      ),
+    },
+    applyJob: {
+      view: (
+        <div>
+          <motion.small
+            variants={STAGGER_CHILD_VARIANTS}
+            class="mb-0 text-muted"
+          >
+            7/8
+          </motion.small>
+          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
+            Get Going!
+          </motion.h1>
+          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
+            Start Applying or Check Your Profile
+          </motion.p>
+          <motion.div
+            variants={STAGGER_CHILD_VARIANTS}
+            class="lead text-muted text-start"
+          >
+            <JobDeckCard />
+          </motion.div>
+          <GlobalButton
+            btnType="button"
+            btnClass="btn btn-outline-primary btn-lg"
+            btnOnClick={() => {
+              setCurrentSection('completedJobSeeker');
+            }}
+          >
+            Continue <i class="bi bi-arrow-right-short"></i>
+          </GlobalButton>
+          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
+            {navigationSection('languages', 'completedJobSeeker')}
+          </motion.h1>
+        </div>
+      ),
+    },
     completedJobSeeker: {
       view: (
         <div>
+          <motion.small
+            variants={STAGGER_CHILD_VARIANTS}
+            class="mb-0 text-muted"
+          >
+            8/8
+          </motion.small>
           <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
             Well done!
           </motion.h1>
           <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            You've finished setting up your account.
+            You've finished setting up your profile.
           </motion.p>
           <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-4">
             🎉
@@ -311,11 +415,21 @@ const main = () => {
             <GlobalButton
               btnType="button"
               btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={() => {
-                router.push(PAGES.dashboard.directory);
+              btnOnClick={async () => {
+                const result = await updateOnboardingApi({
+                  postData: {
+                    onboarding: !apiData.profile.data?.onboarding,
+                  },
+                });
+
+                if (result) {
+                  router.push(
+                    `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
+                  );
+                }
               }}
             >
-              Go to Dashboard <i class="bi bi-arrow-right-short"></i>
+              Go to Profile <i class="bi bi-arrow-right-short"></i>
             </GlobalButton>
           </motion.div>
           <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
@@ -327,9 +441,16 @@ const main = () => {
   };
 
   useEffect(() => {
-    if (apiData.profile.isLoading == false) {
-      if (apiData.profile.data.account_type) {
-        router.push(PAGES.dashboard.directory);
+    const { profile } = apiData;
+    const { isLoading, data } = profile;
+
+    if (!isLoading) {
+      if (data?.account_type) {
+        if (data?.onboarding) {
+          router.push(PAGES.dashboard.directory);
+        } else {
+          setIsPageReady(true);
+        }
       } else {
         setIsPageReady(true);
       }

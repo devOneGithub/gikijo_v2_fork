@@ -23,24 +23,6 @@ const main = () => {
   const router = useRouter();
 
   const [isPageReady, setIsPageReady] = useState(false);
-  const [tourStep, setTourStep] = useState([
-    {
-      target: '.tour-overview',
-      content: 'This is my awesome feature!',
-    },
-    {
-      target: '.tour-quick-access',
-      content: 'This is my awesome feature!',
-    },
-    {
-      target: '.tour-notification',
-      content: 'This is my awesome feature!',
-    },
-    {
-      target: '.tour-channel',
-      content: 'This is my awesome feature!',
-    },
-  ]);
 
   const { isLoading: companyIsLoading, data: companyData } =
     apiData.companyProfile;
@@ -84,11 +66,11 @@ const main = () => {
         icon: <i class="bi bi-building h1 text-white"></i>,
       },
       job_seeker: {
-        title: 'My Resume',
+        title: 'Manage Profile',
         onClick: () => {
-          router.push(PAGES.resume.directory);
+          router.push(PAGES.manage_profile.directory);
         },
-        description: 'Create a standout resume.',
+        description: 'Customize your personal information.',
         icon: <i class="bi bi-file-earmark-person h1 text-white"></i>,
       },
     },
@@ -166,6 +148,51 @@ const main = () => {
         total: offeredApplication.length,
         icon: <i class="bi bi-check2-circle h5 text-secondary me-2" />,
       },
+    },
+  };
+
+  const tourConfig = {
+    job_seeker: {
+      steps: [
+        {
+          target: '.tour-overview',
+          content: `Let's take a look around. From this view, you can get a quick overview of your job application status.`,
+        },
+        {
+          target: '.tour-quick-access',
+          content:
+            'Here, you can find shortcuts to manage your recent activities.',
+        },
+        {
+          target: '.tour-notification',
+          content: `Don't worry about missing important alerts and messages. You can see all your notifications right here.`,
+        },
+        {
+          target: '.tour-resume-profile',
+          content: `To see your live resume profile, click this button.`,
+        },
+      ],
+    },
+    employer: {
+      steps: [
+        {
+          target: '.tour-overview',
+          content: `Let's take a look around. From this view, you can get a quick overview of your job posting's status and the number of applicants so far.`,
+        },
+        {
+          target: '.tour-quick-access',
+          content:
+            'Here, you can find shortcuts to manage your recent activities.',
+        },
+        {
+          target: '.tour-notification',
+          content: `Don't worry about missing important alerts and messages. You can see all your notifications right here.`,
+        },
+        {
+          target: '.tour-channel',
+          content: `Here's a list of channels offered on this site where you can share your job posting. Feel free to explore them!`,
+        },
+      ],
     },
   };
 
@@ -343,7 +370,7 @@ const main = () => {
         ),
       },
       job_seeker: {
-        title: 'My Resume',
+        title: 'My Profile',
         list: (
           <>
             {companyData.length > 0 ? (
@@ -428,10 +455,10 @@ const main = () => {
             btnType="button"
             btnClass="btn btn-outline-primary btn-blog w-100"
             btnOnClick={() => {
-              router.push(PAGES.resume.directory);
+              router.push(PAGES.manage_profile.directory);
             }}
           >
-            <i class="bi bi-pencil"></i> Update Resume
+            <i class="bi bi-pencil"></i> Manage Profile
           </GlobalButton>
         ),
       },
@@ -706,7 +733,7 @@ const main = () => {
       <div class="col d-grid gap-2 d-md-flex justify-content-md-end">
         <GlobalButton
           btnType="button"
-          btnClass="btn btn-primary btn-lg"
+          btnClass="btn btn-primary btn-lg tour-resume-profile"
           btnOnClick={() => {
             if (apiData.resume?.data?.uid) {
               router.push(
@@ -724,7 +751,10 @@ const main = () => {
 
   useEffect(() => {
     if (apiData.profile.isLoading == false) {
-      if (apiData.profile.data.account_type) {
+      if (
+        apiData.profile.data.account_type &&
+        apiData.profile.data.onboarding == true
+      ) {
         setIsPageReady(true);
       } else {
         router.push(PAGES.onboard.directory);
@@ -757,9 +787,9 @@ const main = () => {
 
   return (
     <SideBar>
-      {apiData.profile.data?.product_tour && (
+      {apiData.profile.data?.product_tour === false && (
         <Joyride
-          steps={tourStep}
+          steps={tourConfig[apiData.profile.data?.account_type]?.steps}
           continuous={true}
           showSkipButton={true}
           callback={callbackProductTour}
@@ -798,10 +828,14 @@ const main = () => {
               <h6>Quick Access</h6>
               {quickAccessCard(apiData.profile.data?.account_type)}
             </div>
-            <div class="col tour-channel">
-              <h6>Channels</h6>
-              {channelCard()}
-            </div>
+            {apiData.profile.data?.account_type == 'employer' ? (
+              <div class="col tour-channel">
+                <h6>Channels</h6>
+                {channelCard()}
+              </div>
+            ) : (
+              ''
+            )}
           </div>
         </div>
       </div>

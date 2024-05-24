@@ -169,6 +169,35 @@ export const ApiCallProvider = ({ children }) => {
     }
   };
 
+  const updateOnboardingApi = async ({ postData }) => {
+    try {
+      const { data, error } = await supabase
+        .from('profile')
+        .update({
+          onboarding: postData.onboarding,
+        })
+        .eq('user_uuid', mainData.user.data?.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setMainData((prevData) => ({
+        ...prevData,
+        profile: {
+          data: data,
+          isLoading: false,
+        },
+      }));
+
+      return data;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const updateAccountTypeApi = async ({ postData }) => {
     try {
       const { data, error } = await supabase
@@ -555,6 +584,14 @@ export const ApiCallProvider = ({ children }) => {
       if (error) {
         throw error;
       }
+
+      setMainData((prevData) => ({
+        ...prevData,
+        resume: {
+          data: data.length > 0 ? data[0] : [],
+          isLoading: false,
+        },
+      }));
 
       return data;
     } catch (error) {
@@ -1246,6 +1283,7 @@ export const ApiCallProvider = ({ children }) => {
         setMainData,
         updateProfileApi,
         updateAccountTypeApi,
+        updateOnboardingApi,
         updateProductTourApi,
         getApplicationApi,
       }}

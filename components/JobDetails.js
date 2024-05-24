@@ -30,6 +30,7 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
     },
   });
 
+  const logedIn = apiData.user.data?.id && !apiData.user.isLoading;
   const selectedJob = item ? item : tempData.selectedItem.jobDetails;
 
   const jobData = {
@@ -105,9 +106,13 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                       <strong class="card-title h3">{selectedJob.title}</strong>
                     </h5>
                     <div>
-                      <small class="text-muted">{jobData.employmentType}</small>
+                      <label class="small text-muted">
+                        {jobData.employmentType}
+                      </label>
                       <i class="bi bi-dot"></i>
-                      <small class="text-muted">{jobData.createdAt}</small>
+                      <label class="small text-muted">
+                        {jobData.createdAt}
+                      </label>
                     </div>
                   </div>
                   <div class="flex-shrink-0 mt-2 mt-md-0 text-md-right">
@@ -120,11 +125,15 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                       } me-1`}
                       btnLoading={buttonConfig.apply.isLoading}
                       btnOnClick={() => {
-                        toggleModal('applyJob');
-                        setValueTempData('selectedItem', {
-                          ...tempData.selectedItem,
-                          jobDetails: selectedJob,
-                        });
+                        if (logedIn) {
+                          toggleModal('applyJob');
+                          setValueTempData('selectedItem', {
+                            ...tempData.selectedItem,
+                            jobDetails: selectedJob,
+                          });
+                        } else {
+                          toggleModal('auth');
+                        }
                       }}
                     >
                       {jobData.isApplied ? (
@@ -132,7 +141,11 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                       ) : (
                         ''
                       )}
-                      {jobData.isApplied ? 'Applied' : 'Apply Now'}
+                      {jobData.isApplied
+                        ? 'Applied'
+                        : logedIn
+                        ? 'Apply Now'
+                        : 'Login to Apply'}
                     </GlobalButton>
                     {showBtnExternalPage ? (
                       <GlobalButton
@@ -168,32 +181,32 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                   </div>
                 </div>
 
-                <div class="text-muted small">
+                <div>
                   <ul class="list-unstyled bg-light rounded-2 p-2 mt-2">
-                    <li class="mb-2">
-                      <small class="text-muted">Salary</small>
-                      <p class="fw-bold mb-0 text-truncate">{jobData.salary}</p>
+                    <li class="mb-3">
+                      <label class="small text-muted">Salary</label>
+                      <div class="mb-0 text-truncate">{jobData.salary}</div>
                     </li>
-                    <li class="mb-2">
-                      <small class="text-muted">Requirements</small>
-                      <p class="fw-bold mb-0 text-truncate">
+                    <li class="mb-3">
+                      <label class="small text-muted">Requirements</label>
+                      <div class="mb-0 text-truncate">
                         {jobData.requirements.map((selectedJob, index) => {
                           return <li key={index}>{selectedJob}</li>;
                         })}
-                      </p>
+                      </div>
                     </li>
-                    <li class="mb-2">
-                      <small class="text-muted">Benefits</small>
-                      <p class="fw-bold mb-0 text-truncate">
+                    <li class="mb-3">
+                      <label class="small text-muted">Benefits</label>
+                      <div class="mb-0 text-truncate">
                         {jobData.benefits.map((selectedJob, index) => {
                           return <li key={index}>{selectedJob}</li>;
                         })}
-                      </p>
+                      </div>
                     </li>
                     <hr />
-                    <li class="mb-2">
-                      <small class="text-muted">Company</small>
-                      <p class="fw-bold mb-0 text-truncate">
+                    <li class="mb-3">
+                      <label class="small text-muted">Company</label>
+                      <div class="mb-0 text-truncate">
                         {jobData.company ? (
                           <Link
                             href={`${PAGES.profile.directory}?type=company&uid=${jobData.companyUid}`}
@@ -205,31 +218,31 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                         ) : (
                           ''
                         )}
-                      </p>
+                      </div>
                     </li>
-                    <li class="mb-2">
-                      <small class="text-muted">Registration Number</small>
-                      <p class="fw-bold mb-0 text-truncate">
+                    <li class="mb-3">
+                      <label class="small text-muted">
+                        Registration Number
+                      </label>
+                      <div class="mb-0 text-truncate">
                         {jobData.registration_number}
-                      </p>
+                      </div>
                     </li>
-                    <li class="mb-2">
-                      <small class="text-muted">Company Size</small>
-                      <p class="fw-bold mb-0 text-truncate">{jobData.size}</p>
+                    <li class="mb-3">
+                      <label class="small text-muted">Company Size</label>
+                      <div class="mb-0 text-truncate">{jobData.size}</div>
                     </li>
-                    <li class="mb-2">
-                      <small class="text-muted">Industries</small>
-                      <p class="fw-bold mb-0 text-truncate">
+                    <li class="mb-3">
+                      <label class="small text-muted">Industries</label>
+                      <div class="mb-0 text-truncate">
                         {jobData.industries.join(', ')}
-                      </p>
+                      </div>
                     </li>
-                    <li class="mb-2">
-                      <small class="text-muted">
+                    <li class="mb-3">
+                      <label class="small text-muted">
                         <i class="bi bi-geo-alt"></i> Location
-                      </small>
-                      <p class="fw-bold mb-0 text-truncate">
-                        {jobData.location}
-                      </p>
+                      </label>
+                      <div class="mb-0 text-truncate">{jobData.location}</div>
                     </li>
                   </ul>
                 </div>

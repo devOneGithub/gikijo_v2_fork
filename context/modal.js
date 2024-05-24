@@ -16,6 +16,7 @@ export const ModalProvider = ({ children }) => {
     jobPost: false,
     publishJob: false,
     applyJob: false,
+    editResume: false,
   });
 
   const toggleModal = (key) => {

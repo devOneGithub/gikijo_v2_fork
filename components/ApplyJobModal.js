@@ -89,14 +89,10 @@ const ApplyJobModal = () => {
         }}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Confirmation</Modal.Title>
+          <Modal.Title>New Application</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div class="mb-4">
-            <p>
-              You are trying to apply for a job with your resume. Please confirm
-              to continue.
-            </p>
             <div class="text-muted small">
               <ul class="list-unstyled bg-light rounded-2 p-2 mt-2">
                 <li class="mb-2">
@@ -108,7 +104,7 @@ const ApplyJobModal = () => {
                 </li>
                 <hr />
                 <li class="mb-2">
-                  <small class="text-muted">My Resume</small>
+                  <small class="text-muted">My Profile</small>
                   <p class="fw-bold mb-0 text-truncate">
                     {resumeDetails.full_name}
                   </p>
@@ -137,10 +133,10 @@ const ApplyJobModal = () => {
               btnType="button"
               btnClass="btn btn-outline-secondary"
               btnOnClick={() => {
-                window.open(`${PAGES.resume.directory}`, '_blank');
+                window.open(`${PAGES.manage_profile.directory}`, '_blank');
               }}
             >
-              <i class="bi bi-pencil me-1"></i> Edit Resume
+              <i class="bi bi-pencil me-1"></i> Edit Profile
             </GlobalButton>
             <GlobalButton
               btnType="button"
