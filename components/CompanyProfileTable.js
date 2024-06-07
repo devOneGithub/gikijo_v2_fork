@@ -17,11 +17,13 @@ import CompanyProfileModal from './CompanyProfileModal.js';
 import EmptyData from './EmptyData.js';
 import { useModal } from '../context/modal.js';
 import { useTempData } from '../context/tempData.js';
+import { useRouter } from 'next/router.js';
 
 const CompanyProfileTable = () => {
   const { apiData } = useApiCall();
   const { isModalOpen, toggleModal } = useModal();
   const { tempData, setValueTempData } = useTempData();
+  const router = useRouter();
 
   return (
     <>
@@ -42,6 +44,7 @@ const CompanyProfileTable = () => {
                 <th scope="col"></th>
                 <th scope="col"></th>
                 <th scope="col"></th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
@@ -54,6 +57,11 @@ const CompanyProfileTable = () => {
                     ?.name,
                   country: COUNTRIES.find((type) => type.value === item.country)
                     ?.name,
+                  actionBtn: () => {
+                    router.push(
+                      `${PAGES.profile.directory}?type=company&uid=${item.uid}`
+                    );
+                  },
                 };
 
                 return (
@@ -80,10 +88,18 @@ const CompanyProfileTable = () => {
                       </p>
                     </th>
                     <td>
-                      <small class="text-muted crop-text">{data.size}</small>
+                      <small class="text-mutedx">{data.size}</small>
                     </td>
                     <td>
-                      <small class="text-muted crop-text">{data.country}</small>
+                      <small class="text-muted">{data.country}</small>
+                    </td>
+                    <td>
+                      <strong
+                        class="text-primary fw-bold clickable"
+                        onClick={data.actionBtn}
+                      >
+                        View Live
+                      </strong>
                     </td>
                   </tr>
                 );

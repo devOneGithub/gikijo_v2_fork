@@ -1,7 +1,29 @@
 import { COUNTRIES, EMPLOYMENT_TYPES, SALARY_TYPES } from '../utils/constants';
 import moment from 'moment';
 
-const JobCard = ({ selected = null, item }) => {
+const JobCard = ({
+  selected = null,
+  item,
+  displayOnly = false,
+  isPublished = null,
+}) => {
+  const statusConfig = {
+    publish: {
+      status: 'Published',
+      theme: {
+        badge: 'badge-status-success',
+        icon: <i class="bi bi-check-circle"></i>,
+      },
+    },
+    unpublish: {
+      status: 'unpublish',
+      theme: {
+        badge: 'badge-status-error',
+        icon: <i class="bi bi-exclamation-circle"></i>,
+      },
+    },
+  };
+
   const jobData = {
     title: item.title,
     employmentType: EMPLOYMENT_TYPES.find(
@@ -24,12 +46,28 @@ const JobCard = ({ selected = null, item }) => {
 
   return (
     <div
-      class={`card card-move card-size hover-border ${
-        selected ? 'selected-border' : ''
-      }`}
+      class={`card card-size ${
+        displayOnly ? 'text-muted card-no-border' : 'card-move hover-border'
+      } ${selected ? 'selected-border' : ''}`}
     >
-      <div class="card-body text-truncate">
-        <h6 class="card-title mb-0">{jobData.title}</h6>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-8">
+            <h6 class="mb-0">{jobData.title}</h6>
+          </div>
+          {displayOnly ? (
+            <div class="col-auto ms-auto">
+              <span
+                class={`badge rounded-pill ${statusConfig[isPublished]?.theme.badge}`}
+              >
+                {statusConfig[isPublished]?.theme.icon}{' '}
+                {statusConfig[isPublished]?.status}
+              </span>
+            </div>
+          ) : (
+            ''
+          )}
+        </div>
         <div>
           <small class="text-muted">{jobData.employmentType}</small>
           <i class="bi bi-dot"></i>
@@ -54,6 +92,7 @@ const JobCard = ({ selected = null, item }) => {
           })}
         </ul>
       </div>
+      {displayOnly ? <span class="transparent-gradient"></span> : ''}
     </div>
   );
 };

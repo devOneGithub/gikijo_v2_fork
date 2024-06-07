@@ -11,6 +11,7 @@ import { PAGES, STAGGER_CHILD_VARIANTS } from '../utils/constants';
 import { useModal } from '../context/modal';
 import JobPostTable from '../components/JobPostTable';
 import CompanyProfileTable from '../components/CompanyProfileTable';
+import CompanyProfileForm from '../components/CompanyProfileForm';
 
 const main = () => {
   const { apiData, updateAccountTypeApi, addResumeApi, updateOnboardingApi } =
@@ -19,6 +20,16 @@ const main = () => {
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState('getStarted');
   const [isPageReady, setIsPageReady] = useState(false);
+
+  useEffect(() => {
+    if (
+      currentSection !== 'getStarted' ||
+      currentSection !== 'completedJobSeeker' ||
+      currentSection !== 'completedEmployer'
+    ) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentSection]);
 
   const mainAccessConfig = {
     employer: {
@@ -61,7 +72,7 @@ const main = () => {
 
   const navigationSection = (prevPage, nextPage) => {
     return (
-      <div class="mt-5">
+      <div class="mt-4">
         {prevPage ? (
           <i
             class="bi bi-arrow-left me-3 clickable"
@@ -70,14 +81,14 @@ const main = () => {
         ) : (
           <i class="bi bi-arrow-left me-3 opacity-25"></i>
         )}
-        {nextPage ? (
+        {/* {nextPage ? (
           <i
             class="bi bi-arrow-right ms-3 clickable"
             onClick={() => setCurrentSection(nextPage)}
           ></i>
-        ) : (
-          <i class="bi bi-arrow-right ms-3 opacity-25"></i>
-        )}
+        ) : ( */}
+        <i class="bi bi-arrow-right ms-3 opacity-25"></i>
+        {/* )} */}
       </div>
     );
   };
@@ -86,15 +97,17 @@ const main = () => {
     title,
     subtitle,
     section,
+    customBody,
     nextSection,
     prevSection,
     steps,
+    type,
   }) => (
     <div>
-      <motion.small variants={STAGGER_CHILD_VARIANTS} class="mb-0 text-muted">
+      <motion.h6 variants={STAGGER_CHILD_VARIANTS} class="mb-0 text-primary">
         {steps}
-      </motion.small>
-      <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
+      </motion.h6>
+      <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mb-0">
         {title}
       </motion.h1>
       <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
@@ -104,16 +117,36 @@ const main = () => {
         variants={STAGGER_CHILD_VARIANTS}
         class="lead text-muted text-start"
       >
-        <div class="card">
-          <div class="card-body">
-            <ResumeForm
-              section={section}
-              onSuccessFunction={() => {
-                setCurrentSection(nextSection);
-              }}
-            />
-          </div>
-        </div>
+        {customBody ? (
+          customBody
+        ) : (
+          <>
+            <div class="card">
+              <div class="card-body">
+                {type == 'jobSeeker' ? (
+                  <ResumeForm
+                    section={section}
+                    onSuccessFunction={() => {
+                      setCurrentSection(nextSection);
+                    }}
+                  />
+                ) : (
+                  ''
+                )}
+                {type == 'employer' ? (
+                  <CompanyProfileForm
+                    section={section}
+                    onSuccessFunction={() => {
+                      setCurrentSection(nextSection);
+                    }}
+                  />
+                ) : (
+                  ''
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </motion.div>
       <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
         {navigationSection(prevSection, nextSection)}
@@ -124,170 +157,142 @@ const main = () => {
   const viewConfig = {
     getStarted: {
       view: (
-        <>
-          <motion.h6
-            variants={STAGGER_CHILD_VARIANTS}
-            class="mb-0 text-primary"
-          >
-            WELCOME!
-          </motion.h6>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Let's Get Started
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            What would you like to do?
-          </motion.p>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <div class="row row-cols-1 row-cols-md-2 g-4">
-              {Object.values(mainAccessConfig).map((config, index) => (
-                <div class="col" onClick={config.onClick} key={index}>
-                  <div class="card card-move hover-click">
-                    <div class="card-body row">
-                      <div class="col text-center">{config.icon}</div>
-                      <h5 class="card-title font-weight-bold mt-3">
-                        {config.title}
-                      </h5>
+        <SectionView
+          title="Let's Get Started"
+          subtitle="What would you like to do?"
+          customBody={
+            <div class="text-center">
+              <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                  {Object.values(mainAccessConfig).map((config, index) => (
+                    <div class="col" onClick={config.onClick} key={index}>
+                      <div class="card card-move hover-click">
+                        <div class="card-body row">
+                          <div class="col text-center">{config.icon}</div>
+                          <h5 class="card-title font-weight-bold mt-3">
+                            {config.title}
+                          </h5>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </motion.div>
             </div>
-          </motion.div>
-        </>
+          }
+          steps="WELCOME!"
+        />
       ),
     },
     createCompanyProfile: {
       view: (
-        <div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Set Up Your Company Profile
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            Create Your Company's Identity
-          </motion.p>
-          <motion.p
-            variants={STAGGER_CHILD_VARIANTS}
-            class="text-primary clickable"
-          >
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-primary btn-lg"
-              btnOnClick={() => {
-                toggleModal('companyProfile');
-              }}
-            >
-              <i class="bi bi-plus-lg"></i> Add Company
-            </GlobalButton>
-          </motion.p>
-          <motion.div
-            variants={STAGGER_CHILD_VARIANTS}
-            class="lead text-muted text-start"
-          >
-            <CompanyProfileTable />
-          </motion.div>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={() => {
-                setCurrentSection('createJobPost');
-              }}
-            >
-              Continue <i class="bi bi-arrow-right-short"></i>
-            </GlobalButton>
-          </motion.div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('getStarted', 'createJobPost')}
-          </motion.h1>
-        </div>
+        <SectionView
+          type="employer"
+          title="Let's Set Up Your Company Profile"
+          subtitle="Tell us a bit about your company"
+          section="basicInfo"
+          prevSection="getStarted"
+          nextSection="createBusinessOverview"
+          steps="1/4"
+        />
+      ),
+    },
+    createBusinessOverview: {
+      view: (
+        <SectionView
+          type="employer"
+          title="Your Business Overview"
+          subtitle="Highlight Your Business's Core Information"
+          section="businessOverview"
+          prevSection="createCompanyProfile"
+          nextSection="createJobPost"
+          steps="2/4"
+        />
       ),
     },
     createJobPost: {
       view: (
-        <div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Create Your Job Post
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            Let's Design Your Job Opportunity
-          </motion.p>
-          <motion.p
-            variants={STAGGER_CHILD_VARIANTS}
-            class="text-primary clickable"
-          >
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-primary btn-lg"
-              btnOnClick={() => {
-                toggleModal('jobPost');
-              }}
-            >
-              <i class="bi bi-plus-lg"></i> Add Job Post
-            </GlobalButton>
-          </motion.p>
-          <motion.div
-            variants={STAGGER_CHILD_VARIANTS}
-            class="lead text-muted text-start"
-          >
-            <JobPostTable />
-          </motion.div>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={() => {
-                setCurrentSection('completedEmployer');
-              }}
-            >
-              Continue <i class="bi bi-arrow-right-short"></i>
-            </GlobalButton>
-          </motion.div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('createCompanyProfile', 'completedEmployer')}
-          </motion.h1>
-        </div>
+        <SectionView
+          type="employer"
+          title="Create Your First Job Post"
+          subtitle="Let's Design Your Job Opportunity"
+          customBody={
+            <>
+              <JobPostTable />
+              <div class="text-center">
+                {!apiData.jobPost.isLoading &&
+                apiData.jobPost.data.length == 0 ? (
+                  <span
+                    class="text-primary clickable"
+                    onClick={() => {
+                      setCurrentSection('completedEmployer');
+                    }}
+                  >
+                    Skip
+                  </span>
+                ) : (
+                  <GlobalButton
+                    btnType="button"
+                    btnClass="btn btn-primary btn-lg me-2"
+                    btnOnClick={() => {
+                      setCurrentSection('completedEmployer');
+                    }}
+                  >
+                    Continue <i class="bi bi-arrow-right-short"></i>
+                  </GlobalButton>
+                )}
+              </div>
+            </>
+          }
+          prevSection="createBusinessOverview"
+          nextSection="completedEmployer"
+          steps="3/4"
+        />
       ),
     },
     completedEmployer: {
       view: (
-        <div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Well done!
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            You've finished setting up your account.
-          </motion.p>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            🎉
-          </motion.h1>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={async () => {
-                const result = await updateOnboardingApi({
-                  postData: {
-                    onboarding: !apiData.profile.data?.onboarding,
-                  },
-                });
+        <SectionView
+          type="employer"
+          title="Well done!"
+          subtitle="You've finished setting up your company profile."
+          customBody={
+            <div class="text-center">
+              <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-4">
+                🎉
+              </motion.h1>
+              <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
+                <GlobalButton
+                  btnType="button"
+                  btnClass="btn btn-primary btn-lg"
+                  btnOnClick={async () => {
+                    const result = await updateOnboardingApi({
+                      postData: {
+                        onboarding: !apiData.profile.data?.onboarding,
+                      },
+                    });
 
-                if (result) {
-                  router.push(PAGES.dashboard.directory);
-                }
-              }}
-            >
-              Go to Dashboard <i class="bi bi-arrow-right-short"></i>
-            </GlobalButton>
-          </motion.div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('createJobPost')}
-          </motion.h1>
-        </div>
+                    if (result) {
+                      router.push(
+                        `${PAGES.profile.directory}?type=company&uid=${apiData.companyProfile?.data?.uid}`
+                      );
+                    }
+                  }}
+                >
+                  My Company Profile <i class="bi bi-arrow-right-short"></i>
+                </GlobalButton>
+              </motion.div>
+            </div>
+          }
+          prevSection="createJobPost"
+          steps="4/4"
+        />
       ),
     },
     createResume: {
       view: (
         <SectionView
+          type="jobSeeker"
           title="Let's Build Your Profile"
           subtitle="Tell us a bit about yourself"
           section="personalDetails"
@@ -300,6 +305,7 @@ const main = () => {
     jobDetails: {
       view: (
         <SectionView
+          type="jobSeeker"
           title="Your Work Goals"
           subtitle="Share what you do and what you're looking for"
           section="jobDetails"
@@ -312,6 +318,7 @@ const main = () => {
     workExperience: {
       view: (
         <SectionView
+          type="jobSeeker"
           title="Your Work Experience"
           subtitle="Share your work history and achievements"
           section="workExperience"
@@ -324,6 +331,7 @@ const main = () => {
     educationHistory: {
       view: (
         <SectionView
+          type="jobSeeker"
           title="Your Educational Background"
           subtitle="Share your educational journey"
           section="educationHistory"
@@ -336,6 +344,7 @@ const main = () => {
     skills: {
       view: (
         <SectionView
+          type="jobSeeker"
           title="Your Skills"
           subtitle="Share what you're good at"
           section="skills"
@@ -348,6 +357,7 @@ const main = () => {
     languages: {
       view: (
         <SectionView
+          type="jobSeeker"
           title="Languages You Speak"
           subtitle="List the languages you speak"
           section="languages"
@@ -359,83 +369,74 @@ const main = () => {
     },
     applyJob: {
       view: (
-        <div>
-          <motion.small
-            variants={STAGGER_CHILD_VARIANTS}
-            class="mb-0 text-muted"
-          >
-            7/8
-          </motion.small>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Get Going!
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            Start Applying or Check Your Profile
-          </motion.p>
-          <motion.div
-            variants={STAGGER_CHILD_VARIANTS}
-            class="lead text-muted text-start"
-          >
-            <JobDeckCard />
-          </motion.div>
-          <GlobalButton
-            btnType="button"
-            btnClass="btn btn-outline-primary btn-lg"
-            btnOnClick={() => {
-              setCurrentSection('completedJobSeeker');
-            }}
-          >
-            Continue <i class="bi bi-arrow-right-short"></i>
-          </GlobalButton>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('languages', 'completedJobSeeker')}
-          </motion.h1>
-        </div>
+        <SectionView
+          type="jobSeeker"
+          title="Get Going!"
+          subtitle="Start Applying or Check Your Profile"
+          customBody={
+            <div class="text-center">
+              <motion.div
+                variants={STAGGER_CHILD_VARIANTS}
+                class="lead text-muted text-start"
+              >
+                <JobDeckCard />
+              </motion.div>
+              <motion.div variants={STAGGER_CHILD_VARIANTS}>
+                <GlobalButton
+                  btnType="button"
+                  btnClass="btn btn-outline-primary btn-lg"
+                  btnOnClick={() => {
+                    setCurrentSection('completedJobSeeker');
+                  }}
+                >
+                  Continue <i class="bi bi-arrow-right-short"></i>
+                </GlobalButton>
+              </motion.div>
+            </div>
+          }
+          prevSection="languages"
+          nextSection="completedJobSeeker"
+          steps="7/8"
+        />
       ),
     },
     completedJobSeeker: {
       view: (
-        <div>
-          <motion.small
-            variants={STAGGER_CHILD_VARIANTS}
-            class="mb-0 text-muted"
-          >
-            8/8
-          </motion.small>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-2 mb-0">
-            Well done!
-          </motion.h1>
-          <motion.p variants={STAGGER_CHILD_VARIANTS} class="lead text-muted">
-            You've finished setting up your profile.
-          </motion.p>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            🎉
-          </motion.h1>
-          <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-outline-primary btn-lg"
-              btnOnClick={async () => {
-                const result = await updateOnboardingApi({
-                  postData: {
-                    onboarding: !apiData.profile.data?.onboarding,
-                  },
-                });
+        <SectionView
+          type="jobSeeker"
+          title="Well done!"
+          subtitle="You've finished setting up your profile."
+          customBody={
+            <div class="text-center">
+              <motion.h1 variants={STAGGER_CHILD_VARIANTS} class="mt-4">
+                🎉
+              </motion.h1>
+              <motion.div variants={STAGGER_CHILD_VARIANTS} class="mt-4">
+                <GlobalButton
+                  btnType="button"
+                  btnClass="btn btn-primary btn-lg"
+                  btnOnClick={async () => {
+                    const result = await updateOnboardingApi({
+                      postData: {
+                        onboarding: !apiData.profile.data?.onboarding,
+                      },
+                    });
 
-                if (result) {
-                  router.push(
-                    `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
-                  );
-                }
-              }}
-            >
-              Go to Profile <i class="bi bi-arrow-right-short"></i>
-            </GlobalButton>
-          </motion.div>
-          <motion.h1 variants={STAGGER_CHILD_VARIANTS}>
-            {navigationSection('applyJob')}
-          </motion.h1>
-        </div>
+                    if (result) {
+                      router.push(
+                        `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
+                      );
+                    }
+                  }}
+                >
+                  My Profile <i class="bi bi-arrow-right-short"></i>
+                </GlobalButton>
+              </motion.div>
+            </div>
+          }
+          prevSection="applyJob"
+          steps="8/8"
+        />
       ),
     },
   };

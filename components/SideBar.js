@@ -65,6 +65,14 @@ const Navbar = ({ children }) => {
       icon: <i class="fs-5 bi-people px-2"></i>,
       directory: PAGES.applicants.directory,
     },
+    channel: {
+      title: PAGES.channel.name,
+      action: () => {
+        router.push(PAGES.channel.directory);
+      },
+      icon: <i class="fs-5 bi-send-plus px-2"></i>,
+      directory: PAGES.channel.directory,
+    },
   };
 
   const menuConfigJobSeeker = {

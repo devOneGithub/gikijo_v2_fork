@@ -65,7 +65,7 @@ const main = () => {
     <div className="body">
       <section class="container">
         <Breadcrumb page={PAGES.profile} />
-        {router?.query?.type == 'emloyer' ? (
+        {router?.query?.type == 'company' ? (
           <ProfileEmployer
             item={mainData.profileDetails.data}
             showBtnExternalPage={false}

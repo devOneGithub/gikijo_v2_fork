@@ -12,12 +12,13 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import toast from 'react-hot-toast';
 import EmptyData from '../components/EmptyData.js';
-import PublishModal from '../components/PublishModal.js';
 import JobPostTable from '../components/JobPostTable.js';
 import { useModal } from '../context/modal.js';
+import { useTempData } from '../context/tempData.js';
 
 const main = () => {
   const { isModalOpen, toggleModal } = useModal();
+  const { tempData, setValueTempData } = useTempData();
 
   const createPostButton = () => {
     return (
@@ -30,9 +31,13 @@ const main = () => {
           type="button"
           onClick={() => {
             toggleModal('jobPost');
+            setValueTempData('selectedItem', {
+              ...tempData.selectedItem,
+              publishModalConfigType: 'create',
+            });
           }}
         >
-          <i class="bi bi-plus-lg"></i> Add Job Post
+          <i class="bi bi-plus-lg"></i> Create Post
         </button>
       </div>
     );

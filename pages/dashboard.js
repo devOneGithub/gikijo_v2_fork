@@ -58,11 +58,11 @@ const main = () => {
   const overviewConfigTop = {
     cardOne: {
       employer: {
-        title: 'My Company Profile',
+        title: 'To do',
         onClick: () => {
           router.push(PAGES.company_profile.directory);
         },
-        description: 'Share story about your company.',
+        description: 'Update Company Profile',
         icon: <i class="bi bi-building h1 text-white"></i>,
       },
       job_seeker: {
@@ -76,11 +76,11 @@ const main = () => {
     },
     cardTwo: {
       employer: {
-        title: 'My Job Post',
+        title: 'To do',
         onClick: () => {
           router.push(PAGES.job_post.directory);
         },
-        description: 'Create a compelling job posting.',
+        description: 'Create Post',
         icon: <i class="bi bi-megaphone h1 text-white"></i>,
       },
       job_seeker: {
@@ -192,6 +192,10 @@ const main = () => {
           target: '.tour-channel',
           content: `Here's a list of channels offered on this site where you can share your job posting. Feel free to explore them!`,
         },
+        {
+          target: '.tour-company-profile',
+          content: `To see your live company profile, click this button.`,
+        },
       ],
     },
   };
@@ -207,12 +211,8 @@ const main = () => {
                   <div class="card card-move card-action-btn" id="find-job-btn">
                     <div class="card-body row">
                       <div class="col-9">
-                        <h6 class="card-title font-weight-bold">
-                          {config[type]?.title}
-                        </h6>
-                        <p class="card-text small">
-                          {config[type]?.description}
-                        </p>
+                        <small>{config[type]?.title}</small>
+                        <h6 class="card-text">{config[type]?.description}</h6>
                       </div>
                       <div class="col text-center">{config[type]?.icon}</div>
                     </div>
@@ -326,49 +326,49 @@ const main = () => {
 
   const quickAccessConfig = {
     cardOne: {
-      employer: {
-        title: 'Last Company Profile',
-        list: (
-          <>
-            {companyData.length > 0 ? (
-              <ul class="list-unstyled bg-light rounded-2 p-2">
-                <li>
-                  <small class="text-muted">Company</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {companyData[0]?.company_name || '-'}
-                  </p>
-                </li>
-              </ul>
-            ) : (
-              <></>
-            )}
-          </>
-        ),
-        description: (
-          <p>
-            {!companyIsLoading
-              ? companyData.length > 0
-                ? `You have ${companyData.length} company profile set
-                up now. You can also create many company profiles for different job posts!`
-                : `Create your first company profile. You can also create many company profiles for different job posts!`
-              : 'Loading...'}
-          </p>
-        ),
-        button: (
-          <GlobalButton
-            btnType="button"
-            btnClass="btn btn-outline-primary btn-blog w-100"
-            btnOnClick={() => {
-              router.push(PAGES.company_profile.directory);
-            }}
-          >
-            <i class="bi bi-plus-lg"></i> Add Company
-          </GlobalButton>
-        ),
-      },
+      // employer: {
+      //   title: 'Last Company Profile',
+      //   list: (
+      //     <>
+      //       {companyData.length > 0 ? (
+      //         <ul class="list-unstyled bg-light rounded-2 p-2">
+      //           <li>
+      //             <small class="text-muted">Company</small>
+      //             <p
+      //               class="fw-bold mb-0 text-truncate"
+      //               style={{ maxWidth: '200px' }}
+      //             >
+      //               {companyData[0]?.company_name || '-'}
+      //             </p>
+      //           </li>
+      //         </ul>
+      //       ) : (
+      //         <></>
+      //       )}
+      //     </>
+      //   ),
+      //   description: (
+      //     <p>
+      //       {!companyIsLoading
+      //         ? companyData.length > 0
+      //           ? `You have ${companyData.length} company profile set
+      //           up now.`
+      //           : `Create your first company profile`
+      //         : 'Loading...'}
+      //     </p>
+      //   ),
+      //   button: (
+      //     <GlobalButton
+      //       btnType="button"
+      //       btnClass="btn btn-outline-primary btn-blog w-100"
+      //       btnOnClick={() => {
+      //         router.push(PAGES.company_profile.directory);
+      //       }}
+      //     >
+      //       <i class="bi bi-plus-lg"></i> Add Company
+      //     </GlobalButton>
+      //   ),
+      // },
       job_seeker: {
         title: 'My Profile',
         list: (
@@ -489,7 +489,7 @@ const main = () => {
           <p>
             {!jobPostIsLoading
               ? jobPostData.length > 0
-                ? `You have ${jobPostData.length} job postings right now. Let's create more job posts and share it on all of our channels!`
+                ? `You have ${jobPostData.length} job postings right now. Create more job posts and share it on all of our channels!`
                 : `Create and publish your first job post today and share it on all of our channels!`
               : 'Loading...'}
           </p>
@@ -502,7 +502,7 @@ const main = () => {
               router.push(PAGES.job_post.directory);
             }}
           >
-            <i class="bi bi-plus-lg"></i> Create Job Post
+            <i class="bi bi-plus-lg"></i> Create Post
           </GlobalButton>
         ),
       },
@@ -608,7 +608,7 @@ const main = () => {
     },
     cardThree: {
       employer: {
-        title: 'Last Application',
+        title: 'Last Applicant',
         list: (
           <>
             {jobPostData.length > 0 ? (
@@ -633,8 +633,8 @@ const main = () => {
           <p>
             {!jobPostIsLoading
               ? countApplications > 0
-                ? `Congrats! you currently have ${countApplications} application. Updating its status is easy, you can manage it through your applicants page!`
-                : `Once you’ve received your first application for the job posting, updating its status is easy, you can manage it through your applicants page!`
+                ? `Congrats! you currently have ${countApplications} application. you can manage it through your applicants page.`
+                : `You have ${countApplications} application right now, you can manage it through your applicants page.`
               : 'Loading...'}
           </p>
         ),
@@ -731,20 +731,37 @@ const main = () => {
   const profileCard = () => {
     return (
       <div class="col d-grid gap-2 d-md-flex justify-content-md-end">
-        <GlobalButton
-          btnType="button"
-          btnClass="btn btn-primary btn-lg tour-resume-profile"
-          btnOnClick={() => {
-            if (apiData.resume?.data?.uid) {
-              router.push(
-                `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
-              );
-            }
-          }}
-        >
-          <i class="fs-5 bi-person-circle me-1"></i> View Profile{' '}
-          <i class="bi bi-arrow-right-short"></i>
-        </GlobalButton>
+        {apiData.profile.data?.account_type == 'job_seeker' ? (
+          <GlobalButton
+            btnType="button"
+            btnClass="btn btn-primary btn-lg tour-resume-profile"
+            btnOnClick={() => {
+              if (apiData.resume?.data?.uid) {
+                router.push(
+                  `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
+                );
+              }
+            }}
+          >
+            <i class="fs-5 bi-person-circle me-1"></i> View Profile{' '}
+            <i class="bi bi-arrow-right-short"></i>
+          </GlobalButton>
+        ) : (
+          <GlobalButton
+            btnType="button"
+            btnClass="btn btn-primary btn-lg tour-company-profile"
+            btnOnClick={() => {
+              if (apiData.companyProfile?.data?.uid) {
+                router.push(
+                  `${PAGES.profile.directory}?type=company&uid=${apiData.companyProfile?.data?.uid}`
+                );
+              }
+            }}
+          >
+            <i class="fs-5 bi-building me-1"></i> View Profile{' '}
+            <i class="bi bi-arrow-right-short"></i>
+          </GlobalButton>
+        )}
       </div>
     );
   };
@@ -805,11 +822,7 @@ const main = () => {
         <PageHeader
           title={`Hello, ${apiData.profile.data?.username}!`}
           description={PAGES.dashboard.description}
-          rightContent={
-            apiData.profile.data?.account_type == 'job_seeker'
-              ? profileCard()
-              : null
-          }
+          rightContent={profileCard()}
         />
         <div class="row">
           <div class="row mb-4">

@@ -12,9 +12,10 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import toast from 'react-hot-toast';
 import EmptyData from '../components/EmptyData.js';
-import PublishModal from '../components/PublishModal.js';
 import { useTempData } from '../context/tempData.js';
 import { useModal } from '../context/modal.js';
+import GlobalButton from './GlobalButton.js';
+import SendHistoryModal from './SendHistoryModal.js';
 
 const JobPostTable = () => {
   const { apiData, getJobPostApi } = useApiCall();
@@ -25,15 +26,30 @@ const JobPostTable = () => {
     <>
       <CompanyProfileModal />
       <JobPostModal />
-      <PublishModal />
+      <SendHistoryModal />
       <div>
         <LoadingSpinner isLoading={apiData.jobPost.isLoading} />
         {!apiData.jobPost.isLoading && apiData.jobPost.data.length == 0 ? (
-          <EmptyData
-            icon={<i class="fs-5 bi bi-megaphone"></i>}
-            title="No post yet"
-            description="Create your first job post today!"
-          />
+          <div class="text-center mt-4">
+            {/* <EmptyData
+              icon={<i class="fs-5 bi bi-megaphone"></i>}
+              title="No post yet"
+              description="Create your first job post today!"
+            /> */}
+            <GlobalButton
+              btnType="button"
+              btnClass="btn btn-primary btn-lg me-2 mb-2"
+              btnOnClick={() => {
+                toggleModal('jobPost');
+                setValueTempData('selectedItem', {
+                  ...tempData.selectedItem,
+                  publishModalConfigType: 'create',
+                });
+              }}
+            >
+              <i class="bi bi-plus-lg"></i> Create Post
+            </GlobalButton>
+          </div>
         ) : (
           <table class="table table-responsive">
             <thead>
@@ -77,44 +93,28 @@ const JobPostTable = () => {
                   applicationCount: item.application?.length,
                   actionBtn: {
                     click: async () => {
-                      toggleModal('publishJob');
+                      toggleModal('jobPost');
+                      setValueTempData('selectedItem', {
+                        ...tempData.selectedItem,
+                        editJobDetails: item,
+                        publishModalConfigType: 'share',
+                      });
+                    },
+                    title: isPublished ? 'Channels' : 'Publish this job post',
+                    theme: {
+                      // color: isPublished ? 'text-secondary' : 'text-primary',
+                      color: 'text-primary',
+                    },
+                  },
+                  actionBtnHistory: {
+                    click: async () => {
+                      toggleModal('sendHistory');
                       setValueTempData('selectedItem', {
                         ...tempData.selectedItem,
                         editJobDetails: item,
                       });
-
-                      // const result = await publishJobPostApi({
-                      //   job_post_id: item.id,
-                      //   status,
-                      // });
-
-                      // const newStatus = JOB_POST_STATUS.find(
-                      //   (status) => status.value === result.data.job_post_status
-                      // );
-
-                      // toast.success(`${newStatus.value}!`);
-
-                      // const newJobData = apiData.jobPost.data?.map((job) => {
-                      //   if (job.id === result.data.job_post_id) {
-                      //     return { ...job, job_post_validity: result.data };
-                      //   }
-                      //   return job;
-                      // });
-
-                      // setMainData((prevData) => ({
-                      //   ...prevData,
-                      //   jobPost: {
-                      //     ...prevData.jobPost,
-                      //     data: newJobData,
-                      //   },
-                      // }));
                     },
-                    icon: isPublished ? (
-                      <i class="bi bi-arrow-counterclockwise"></i>
-                    ) : (
-                      <i class="bi bi-send"></i>
-                    ),
-                    title: isPublished ? 'Manage Publication' : 'Publish',
+                    title: isPublished ? 'Channels' : 'Publish this job post',
                     theme: {
                       // color: isPublished ? 'text-secondary' : 'text-primary',
                       color: 'text-primary',
@@ -136,24 +136,35 @@ const JobPostTable = () => {
                   //   }`
                   // : 'unpublish',
                   status: isPublished ? 'Published' : 'unpublish',
+                  viewBtn: {
+                    click: () => {
+                      window.open(
+                        `${PAGES.viewJob.directory}?jobId=${item.uid}`,
+                        '_blank'
+                      );
+                    },
+                  },
                 };
 
                 return (
                   <tr class="align-middle" key={index}>
                     <th scope="row">
-                      {data.title}{' '}
-                      <small
-                        class="mx-2"
+                      <div
                         onClick={() => {
                           toggleModal('jobPost');
                           setValueTempData('selectedItem', {
                             ...tempData.selectedItem,
                             editJobDetails: item,
+                            publishModalConfigType: 'create',
                           });
                         }}
+                        class="clickable"
                       >
-                        <i class="bi bi-pencil-square clickable text-primary"></i>
-                      </small>
+                        <span>{data.title} </span>
+                        <small class="mx-2">
+                          <i class="bi bi-pencil-square text-primary"></i>
+                        </small>
+                      </div>
                       <p class="card-text fw-light">
                         <small class="text-muted">
                           {data.employmentType}{' '}
@@ -165,20 +176,6 @@ const JobPostTable = () => {
                         </small>
                       </p>
                     </th>
-                    <td>
-                      <OverlayTrigger
-                        overlay={
-                          <Tooltip>
-                            How many times your post was shared on social media
-                            platforms
-                          </Tooltip>
-                        }
-                      >
-                        <span class="text-muted">
-                          <i class="bi bi-share"></i> {data.shareCount ?? 0}
-                        </span>
-                      </OverlayTrigger>
-                    </td>
                     <td>
                       <OverlayTrigger
                         overlay={
@@ -214,20 +211,28 @@ const JobPostTable = () => {
                       </small>
                     </td>
                     <td>
-                      <strong
-                        class={`${data.actionBtn.theme.color} fw-bold clickable`}
+                      <span
+                        class={`${data.actionBtn.theme.color} clickable`}
                         onClick={data.actionBtn.click}
                       >
-                        {data.actionBtn.icon} {data.actionBtn.title}
-                      </strong>
+                        <i class="bi bi-send me-1"></i> Channels
+                      </span>
                     </td>
                     <td>
-                      <strong
-                        class={`${data.actionBtn.theme.color} fw-bold clickable`}
-                        onClick={data.actionBtn.click}
+                      <span
+                        class={`${data.actionBtnHistory.theme.color} clickable`}
+                        onClick={data.actionBtnHistory.click}
+                      >
+                        <i class="bi bi-clock-history me-1"></i> Send History
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        class="text-primary clickable"
+                        onClick={data.viewBtn.click}
                       >
                         View Live
-                      </strong>
+                      </span>
                     </td>
                   </tr>
                 );

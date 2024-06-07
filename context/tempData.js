@@ -21,6 +21,8 @@ export const TempDataProvider = ({ children }) => {
       editJobDetails: null,
       editCompanyProfile: null,
       applyJob: null,
+      publishModalConfigType: '',
+      editChannel: '',
     },
   });
 

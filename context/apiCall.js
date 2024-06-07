@@ -61,6 +61,10 @@ export const ApiCallProvider = ({ children }) => {
       data: [],
       isLoading: true,
     },
+    channel: {
+      data: [],
+      isLoading: true,
+    },
   });
 
   const resetData = () => {
@@ -347,7 +351,7 @@ export const ApiCallProvider = ({ children }) => {
       const { data, error } = await supabase
         .from('job_post')
         .select(
-          '*, job_post_validity (*), application (*, resume (*)), job_post_channel_post (*)'
+          '*, job_post_validity (*), application (*, resume (*)), job_post_send_que (*, channel (*), payment_session (*)), company_profile (*)'
         )
         .eq('user_uuid', mainData.user.data?.id)
         .order('id', { ascending: false });
@@ -376,7 +380,9 @@ export const ApiCallProvider = ({ children }) => {
           ...postData,
           user_uuid: mainData.user.data?.id,
         })
-        .select()
+        .select(
+          '*, job_post_validity (*), application (*, resume (*)), job_post_send_que (*, channel (*), payment_session (*)), company_profile (*)'
+        )
         .single();
 
       if (error) {
@@ -402,7 +408,7 @@ export const ApiCallProvider = ({ children }) => {
         })
         .eq('id', id)
         .select(
-          '*, job_post_validity (*), application (*, resume (*)), job_post_channel_post (*)'
+          '*, job_post_validity (*), application (*, resume (*)), job_post_send_que (*, channel (*), payment_session (*)), company_profile (*)'
         )
         .single();
 
@@ -479,10 +485,7 @@ export const ApiCallProvider = ({ children }) => {
 
           function findAndReplace(data, returnData) {
             for (let i = 0; i < data.length; i++) {
-              if (
-                data[i].job_post_validity &&
-                data[i].job_post_validity.id === returnData.id
-              ) {
+              if (data[i].id == returnData.job_post_id) {
                 data[i].job_post_validity = returnData;
                 break;
               }
@@ -511,39 +514,24 @@ export const ApiCallProvider = ({ children }) => {
     }
   };
 
-  const addChannelPostApi = async (postData) => {
-    try {
-      const { data, error } = await supabase
-        .from('job_post_channel_post')
-        .insert(postData.channel_post) // bulk insert (array)
-        .select();
+  // const deleteChannelPostApi = async (postData) => {
+  //   try {
+  //     const idsToDelete = postData.channel_post.map((item) => item.id);
+  //     const { data, error } = await supabase
+  //       .from('job_post_send_que')
+  //       .delete()
+  //       .in('id', idsToDelete) // bulk delete (array)
+  //       .select();
 
-      if (error) {
-        throw error;
-      }
+  //     if (error) {
+  //       throw error;
+  //     }
 
-      return data;
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const deleteChannelPostApi = async (postData) => {
-    try {
-      const idsToDelete = postData.channel_post.map((item) => item.id);
-      const { data, error } = await supabase
-        .from('job_post_channel_post')
-        .delete()
-        .eq('id', idsToDelete); // bulk delete (array)
-
-      if (error) {
-        throw error;
-      }
-      return data;
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+  //     return data;
+  //   } catch (error) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   const getResumeApi = async () => {
     try {
@@ -579,7 +567,8 @@ export const ApiCallProvider = ({ children }) => {
       const { data, error } = await supabase
         .from('resume')
         .upsert(dataToUpdate, { onConflict: 'user_uuid' })
-        .select();
+        .select()
+        .single();
 
       if (error) {
         throw error;
@@ -588,7 +577,7 @@ export const ApiCallProvider = ({ children }) => {
       setMainData((prevData) => ({
         ...prevData,
         resume: {
-          data: data.length > 0 ? data[0] : [],
+          data: data,
           isLoading: false,
         },
       }));
@@ -604,8 +593,7 @@ export const ApiCallProvider = ({ children }) => {
       const { data, error } = await supabase
         .from('company_profile')
         .select('*')
-        .eq('user_uuid', mainData.user.data?.id)
-        .order('id', { ascending: false });
+        .eq('user_uuid', mainData.user.data?.id);
 
       if (error) {
         throw error;
@@ -614,7 +602,7 @@ export const ApiCallProvider = ({ children }) => {
       setMainData((prevData) => ({
         ...prevData,
         companyProfile: {
-          data: data,
+          data: data.length > 0 ? data[0] : [],
           isLoading: false,
         },
       }));
@@ -623,15 +611,17 @@ export const ApiCallProvider = ({ children }) => {
     }
   };
 
-  const addCompanyProfileApi = async (postData) => {
+  const addCompanyProfileApi = async ({ postData }) => {
     try {
+      let dataToUpdate = { ...postData, user_uuid: mainData.user.data?.id };
+
+      if (!postData.uid) {
+        dataToUpdate.uid = generateUniqueID();
+      }
+
       const { data, error } = await supabase
         .from('company_profile')
-        .insert({
-          ...postData,
-          uid: generateUniqueID(),
-          user_uuid: mainData.user.data?.id,
-        })
+        .upsert(dataToUpdate, { onConflict: 'user_uuid' })
         .select()
         .single();
 
@@ -640,80 +630,16 @@ export const ApiCallProvider = ({ children }) => {
       }
 
       if (data) {
-        mainData.companyProfile.data.unshift(data);
-      }
-
-      return data;
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const editCompanyProfileApi = async ({ postData, id }) => {
-    try {
-      const { data, error } = await supabase
-        .from('company_profile')
-        .update({
-          ...postData,
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      const currentData = mainData.companyProfile.data;
-      const indexToReplace = currentData.findIndex((obj) => obj.id === data.id);
-      const newData = [
-        ...currentData.slice(0, indexToReplace),
-        data,
-        ...currentData.slice(indexToReplace + 1),
-      ];
-
-      setMainData((prevData) => ({
-        ...prevData,
-        companyProfile: {
-          data: newData,
-          isLoading: false,
-        },
-      }));
-
-      return data;
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const deleteCompanyProfileApi = async (postData) => {
-    try {
-      const { data, error } = await supabase
-        .from('company_profile')
-        .delete()
-        .eq('id', postData.id)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        const currentData = mainData.companyProfile.data;
-        const newData = currentData.filter((item) => item.id !== data.id);
-
         setMainData((prevData) => ({
           ...prevData,
           companyProfile: {
-            data: newData,
+            data: data,
             isLoading: false,
           },
         }));
-
-        toast.success('Deleted!');
-        return data;
       }
+
+      return data;
     } catch (error) {
       toast.error(error.message);
     }
@@ -733,6 +659,30 @@ export const ApiCallProvider = ({ children }) => {
       setMainData((prevData) => ({
         ...prevData,
         application: {
+          data: data,
+          isLoading: false,
+        },
+      }));
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const getChannelApi = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('channel')
+        .select('*')
+        .eq('user_uuid', mainData.user.data?.id)
+        .order('id', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      setMainData((prevData) => ({
+        ...prevData,
+        channel: {
           data: data,
           isLoading: false,
         },
@@ -1103,6 +1053,61 @@ export const ApiCallProvider = ({ children }) => {
     }
   };
 
+  const createStripeCustomerApi = async (postData) => {
+    try {
+      const response = await fetch('/api/stripe/create-customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...postData,
+          email: mainData.profile.email,
+          user_uuid: mainData.user.data?.id,
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          return responseData;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
+      }
+    } catch (error) {
+      toast.error('An error occurred while processing the request');
+    }
+  };
+
+  const createStripeCheckoutSessionApi = async (postData) => {
+    try {
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...postData,
+          user_uuid: mainData.user.data?.id,
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          return responseData;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
+      }
+    } catch (error) {
+      toast.error('An error occurred while processing the request');
+    }
+  };
+
   const promiseAllApi = async () => {
     await Promise.all([
       getProfileApi(),
@@ -1111,6 +1116,7 @@ export const ApiCallProvider = ({ children }) => {
       getResumeApi(),
       getCompanyProfileApi(),
       getApplicationApi(),
+      getChannelApi(),
     ]);
   };
 
@@ -1205,6 +1211,8 @@ export const ApiCallProvider = ({ children }) => {
           duration: 6000,
         }
       );
+
+      return data;
     } catch (error) {
       toast.error(error.message);
     }
@@ -1266,12 +1274,8 @@ export const ApiCallProvider = ({ children }) => {
         deleteJobPostApi,
         publishJobPostApi,
         applyJobPostApi,
-        addChannelPostApi,
-        deleteChannelPostApi,
         getCompanyProfileApi,
         addCompanyProfileApi,
-        editCompanyProfileApi,
-        deleteCompanyProfileApi,
         editApplicationApi,
         getJobDetailsApi,
         getResumeDetailsApi,
@@ -1286,6 +1290,8 @@ export const ApiCallProvider = ({ children }) => {
         updateOnboardingApi,
         updateProductTourApi,
         getApplicationApi,
+        createStripeCustomerApi,
+        createStripeCheckoutSessionApi,
       }}
     >
       {children}

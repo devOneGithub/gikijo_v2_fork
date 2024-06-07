@@ -102,11 +102,25 @@ const AuthModal = ({ show, setShow }) => {
     ).value;
 
     if (password == repeatPassword) {
-      await signUpApi({
+      const result = await signUpApi({
         username: document.getElementById('input-signup-username').value,
         email: document.getElementById('input-signup-email').value,
         password: document.getElementById('input-signup-password').value,
       });
+
+      if (result?.user) {
+        document.getElementById('input-signup-username').value = '';
+        document.getElementById('input-signup-email').value = '';
+        document.getElementById('input-signup-password').value = '';
+        document.getElementById('input-signup-repeat-password').value = '';
+
+        // setTimeout(() => {
+        //   toast.success('Switching to login tab...');
+        //   setTimeout(() => {
+        //     handleSelect('login');
+        //   }, 2500);
+        // }, 3500);
+      }
     } else {
       toast.error('Password and repeat password does not match!');
     }

@@ -28,7 +28,7 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
   const router = useRouter();
   const { apiData } = useApiCall();
   const { isModalOpen, toggleModal } = useModal();
-  const [resumeModalConfig, setResumeModalConfig] = useState({
+  const [modalConfig, setModalConfig] = useState({
     title: '',
     section: '',
   });
@@ -88,10 +88,10 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
   };
 
   const detailsConfig2 = {
-    aboutMe: {
-      title: 'About Me',
-      value: getDisplayValue(item, 'about_me'),
-    },
+    // aboutMe: {
+    //   title: 'About Me',
+    //   value: getDisplayValue(item, 'about_me'),
+    // },
     gender: {
       title: 'Gender',
       value: getDisplayValue(item, 'gender'),
@@ -254,7 +254,7 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
 
     const handleEditClick = () => {
       toggleModal('editResume');
-      setResumeModalConfig({ title, section });
+      setModalConfig({ title, section });
     };
 
     return (
@@ -279,8 +279,8 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
   return (
     <div class="row">
       <ResumeModal
-        section={resumeModalConfig.section}
-        title={resumeModalConfig.title}
+        section={modalConfig.section}
+        title={modalConfig.title}
         onSuccessFunction={() => {
           onSuccessFunction();
           toggleModal('editResume');
@@ -311,31 +311,17 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
                   </div>
                 </div>
               </div>
-              {/* <div class="mt-4">
+              <div class="mt-4">
                 <GlobalButton
                   btnType="button"
-                  btnClass="btn btn-primary me-1"
-                  btnTitle="Follow"
-                  btnLoading={buttonConfig.apply.isLoading}
-                  btnOnClick={() => {}}
-                />
-                <GlobalButton
-                  btnType="button"
-                  btnClass="btn btn-primary me-1"
-                  btnLoading={buttonConfig.apply.isLoading}
-                  btnOnClick={() => {}}
+                  btnClass="btn btn-outline-primary w-100"
+                  btnOnClick={() => {
+                    router.push(PAGES.dashboard.directory);
+                  }}
                 >
-                  <i class="bi bi-chat-dots-fill"></i>
+                  <i class="bi-bar-chart-line px-2"></i> View Dashboard
                 </GlobalButton>
-                <GlobalButton
-                  btnType="button"
-                  btnClass="btn btn-secondary me-1"
-                  btnLoading={buttonConfig.apply.isLoading}
-                  btnOnClick={() => {}}
-                >
-                  <i class="bi bi-share-fill"></i>
-                </GlobalButton>
-              </div> */}
+              </div>
             </div>
             {displayItem({
               title: 'Job Details',

@@ -26,7 +26,7 @@ const main = () => {
             }
           }}
         >
-          <i class="fs-5 bi-person-circle me-1"></i> View Profile{' '}
+          <i class="fs-5 bi-person-circle me-1"></i> View Live{' '}
           <i class="bi bi-arrow-right-short"></i>
         </button>
       </div>

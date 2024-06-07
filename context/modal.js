@@ -14,9 +14,11 @@ export const ModalProvider = ({ children }) => {
     companyProfile: false,
     jobDetails: false,
     jobPost: false,
-    publishJob: false,
     applyJob: false,
     editResume: false,
+    editCompanyProfile: false,
+    editChannel: false,
+    sendHistory: false,
   });
 
   const toggleModal = (key) => {

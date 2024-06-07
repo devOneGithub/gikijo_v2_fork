@@ -20,14 +20,16 @@ import { useApiCall } from '../context/apiCall';
 import JobList from './JobList';
 import JobDetails from './JobDetails';
 import { useModal } from '../context/modal';
+import CompanyProfileModal from './CompanyProfileModal';
+import { useRouter } from 'next/router';
 
-function ProfileEmployer({ isLoading, isEmpty, iteme }) {
+function ProfileEmployer({ isLoading, isEmpty, item, onSuccessFunction }) {
   const { isModalOpen, toggleModal } = useModal();
-
-  const [buttonConfig, setButtonConfig] = useState({
-    apply: {
-      isLoading: false,
-    },
+  const { apiData } = useApiCall();
+  const router = useRouter();
+  const [modalConfig, setModalConfig] = useState({
+    title: '',
+    section: '',
   });
 
   const findInArray = (array, property, value) => {
@@ -38,181 +40,7 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
     return item?.[property] ?? defaultValue;
   };
 
-  const jobSeekerProfileConfig = {
-    fullName: {
-      title: 'Full Name',
-      value: getDisplayValue(item, 'full_name'),
-    },
-    accountType: {
-      title: 'Account Type',
-      value: 'Job Seeker',
-    },
-    country: {
-      title: 'Country',
-      value: getDisplayValue(
-        findInArray(COUNTRIES, 'value', item?.country),
-        'name',
-        ''
-      ),
-    },
-  };
-
-  const jobSeekerDetailsConfig = {
-    currentJobStatus: {
-      title: 'Current Job Status',
-      value: getDisplayValue(
-        findInArray(CURRENT_JOB_STATUS, 'value', item?.current_job_status),
-        'name',
-        ''
-      ),
-    },
-    preferredJob: {
-      title: 'Preferred Job',
-      value: getDisplayValue(item, 'preferred_job'),
-    },
-    expectedSalary: {
-      title: 'Expected Salary',
-      value: `${getDisplayValue(item, 'expected_min_salary')}${
-        getDisplayValue(item, 'expected_max_salary')
-          ? ` - ${getDisplayValue(item, 'expected_max_salary')}`
-          : ''
-      } ${getDisplayValue(
-        findInArray(SALARY_TYPES, 'value', item?.expected_salary_type),
-        'name',
-        ''
-      )}`,
-    },
-    skills: {
-      title: 'Skills',
-      value: Array.isArray(getDisplayValue(item, 'skills')) ? (
-        <ul>
-          {getDisplayValue(item, 'skills').map((skills) => {
-            if (skills?.name) {
-              return (
-                <li key={skills.name}>
-                  {`${skills.name} - ${
-                    SKILL_LEVELS.find((level) => level.value === skills.level)
-                      ?.name ?? '-'
-                  }`}
-                </li>
-              );
-            }
-            return '-';
-          })}
-        </ul>
-      ) : (
-        getDisplayValue(item, 'skills')
-      ),
-    },
-  };
-
-  const jobSeekerDetailsConfig2 = {
-    aboutMe: {
-      title: 'About Me',
-      value: getDisplayValue(item, 'about_me'),
-    },
-    gender: {
-      title: 'Gender',
-      value: getDisplayValue(item, 'gender'),
-    },
-    dateOfBirth: {
-      title: 'Date of Birth',
-      value: getDisplayValue(item, 'date_of_birth'),
-    },
-    phoneNumber: {
-      title: 'Phone Number',
-      value: getDisplayValue(item, 'phone_number'),
-    },
-    address: {
-      title: 'Address',
-      value: `${getDisplayValue(item, 'address_1')}${
-        getDisplayValue(item, 'address_2')
-          ? `, ${getDisplayValue(item, 'address_2')}`
-          : ''
-      }${
-        getDisplayValue(item, 'city')
-          ? `, ${getDisplayValue(item, 'city')}`
-          : ''
-      }${
-        getDisplayValue(item, 'state')
-          ? `, ${getDisplayValue(item, 'state')}`
-          : ''
-      }, ${getDisplayValue(
-        findInArray(COUNTRIES, 'value', item?.country),
-        'name',
-        ''
-      )}`,
-    },
-    workExperiences: {
-      title: 'Work Experiences',
-      value: Array.isArray(getDisplayValue(item, 'work_experience')) ? (
-        <ul>
-          {getDisplayValue(item, 'work_experience').map((work) => {
-            if (work?.job_title) {
-              return (
-                <li key={work.job_title}>
-                  <strong>{work.job_title}</strong> at {work.company_name} (
-                  {work.start_date} - {work.end_date})
-                  <br />
-                  Responsibilities: {work?.responsibilities ?? ''}
-                </li>
-              );
-            }
-            return '-';
-          })}
-        </ul>
-      ) : (
-        getDisplayValue(item, 'work_experience')
-      ),
-    },
-    educationBackground: {
-      title: 'Education Background',
-      value: getDisplayValue(item, 'education_background'),
-      value: Array.isArray(getDisplayValue(item, 'education_background')) ? (
-        <ul>
-          {getDisplayValue(item, 'education_background').map((edu) => {
-            if (edu?.institution_name) {
-              return (
-                <li key={edu.institution_name}>
-                  <strong>{edu.institution_name}</strong>
-                  {edu.field_of_study && `, ${edu.field_of_study}`}
-                  {edu.start_date && ` (${edu.start_date} - ${edu.end_date})`}
-                </li>
-              );
-            }
-            return '-';
-          })}
-        </ul>
-      ) : (
-        getDisplayValue(item, 'education_background')
-      ),
-    },
-    languages: {
-      title: 'Languages',
-      value: Array.isArray(getDisplayValue(item, 'languages')) ? (
-        <ul>
-          {getDisplayValue(item, 'languages').map((language) => {
-            if (language?.name) {
-              return (
-                <li key={language.name}>
-                  {`${language.name} - ${
-                    LANGUAGE_LEVELS.find(
-                      (level) => level.value === language.level
-                    )?.name ?? '-'
-                  }`}
-                </li>
-              );
-            }
-            return '-';
-          })}
-        </ul>
-      ) : (
-        getDisplayValue(item, 'languages')
-      ),
-    },
-  };
-
-  const companyProfileConfig = {
+  const profileConfig = {
     companyName: {
       title: 'Company Name',
       value: getDisplayValue(item, 'company_name'),
@@ -232,19 +60,11 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
   };
 
   const companyDetailsConfig = {
-    companySize: {
-      title: 'Company Size',
-      value: getDisplayValue(
-        findInArray(COMPANY_SIZES, 'value', item?.size),
-        'name',
-        ''
-      ),
+    aboutUs: {
+      title: 'About Us',
+      value: getDisplayValue(item, 'about_us'),
     },
-    registrationNumber: {
-      title: 'Registration Number',
-      value: getDisplayValue(item, 'registration_number'),
-    },
-    skills: {
+    industries: {
       title: 'Industries',
       value: Array.isArray(getDisplayValue(item, 'industries')) ? (
         <ul>
@@ -261,14 +81,22 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
         ''
       ),
     },
+    companySize: {
+      title: 'Company Size',
+      value: getDisplayValue(
+        findInArray(COMPANY_SIZES, 'value', item?.size),
+        'name',
+        ''
+      ),
+    },
   };
 
   const companyDetailsConfig2 = {
-    aboutUs: {
-      title: 'About Us',
-      value: getDisplayValue(item, 'about_us'),
+    registrationNumber: {
+      title: 'Registration Number',
+      value: getDisplayValue(item, 'registration_number'),
     },
-    fullName: {
+    website: {
       title: 'Website',
       value: getDisplayValue(item, 'website'),
     },
@@ -299,22 +127,70 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
   };
 
   const mapValue = (data) => {
-    return Object.entries(data).map(([key, value]) => {
+    const entries = Object.entries(data);
+
+    return entries.map(([key, value], index) => {
+      const isLastItem = index === entries.length - 1;
+      const itemClass = isLastItem ? '' : 'mb-3';
+
       return (
-        <div class="mt-4">
-          <strong>{value.title}</strong>
-          <p>{value.value}</p>
-        </div>
+        <li className={itemClass} key={key}>
+          {value?.title && (
+            <label className="small text-muted">{value.title}</label>
+          )}
+          <div className="mb-0 text-truncate">{value.value}</div>
+        </li>
       );
     });
   };
 
+  const displayItem = ({ title = '', section = '', config = null }) => {
+    let isOwner = false;
+
+    if (item?.user_uuid && apiData.user?.data?.id) {
+      if (item?.user_uuid === apiData.user.data.id) {
+        isOwner = true;
+      }
+    }
+
+    const handleEditClick = () => {
+      toggleModal('editCompanyProfile');
+      setModalConfig({ title, section });
+    };
+
+    return (
+      <>
+        {isOwner && (
+          <div class="d-flex">
+            <strong class="flex-grow-1 text-muted">{title}</strong>
+            <span class="text-primary clickable" onClick={handleEditClick}>
+              <i class="bi bi-pencil me-1"></i> Edit
+            </span>
+          </div>
+        )}
+        <div>
+          <ul class="list-unstyled bg-light rounded-2 p-2 mt-2">
+            {mapValue(config)}
+          </ul>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div class="row">
+      <CompanyProfileModal
+        section={modalConfig.section}
+        title={modalConfig.title}
+        onSuccessFunction={() => {
+          onSuccessFunction();
+          toggleModal('editCompanyProfile');
+        }}
+      />
       <div class="col-lg-4">
         <div class="card">
           <div class="card-body">
-            <div class="text-center">
+            <div class="text-center mb-4">
               <div>
                 <div class="col-auto">
                   <i class="fs-1 bi-building"></i>
@@ -322,47 +198,39 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
                 <div class="col my-auto">
                   <h5 class="mb-0">
                     <strong class="card-title h3">
-                      {companyProfileConfig.companyName.value}
+                      {profileConfig.companyName.value}
                     </strong>
                   </h5>
                   <div>
                     <small class="text-muted">
-                      {companyProfileConfig.accountType.value}
+                      {profileConfig.accountType.value}
                     </small>
                     <i class="bi bi-dot"></i>
                     <small class="text-muted">
-                      {companyProfileConfig.country.value}
+                      {profileConfig.country.value}
                     </small>
                   </div>
                 </div>
               </div>
-              {/* <div class="mt-4">
+              <div class="mt-4">
                 <GlobalButton
                   btnType="button"
-                  btnClass="btn btn-primary me-1"
-                  btnTitle="Follow"
-                  btnLoading={buttonConfig.apply.isLoading}
-                  btnOnClick={() => {}}
-                />
-                <GlobalButton
-                  btnType="button"
-                  btnClass="btn btn-primary me-1"
-                  btnLoading={buttonConfig.apply.isLoading}
-                  btnOnClick={() => {}}
+                  btnClass="btn btn-outline-primary w-100"
+                  btnOnClick={() => {
+                    router.push(PAGES.dashboard.directory);
+                  }}
                 >
-                  <i class="bi bi-chat-dots-fill"></i>
+                  <i class="bi-bar-chart-line px-2"></i> View Dashboard
                 </GlobalButton>
-                <GlobalButton
-                  btnType="button"
-                  btnClass="btn btn-secondary me-1"
-                  btnLoading={buttonConfig.apply.isLoading}
-                  btnOnClick={() => {}}
-                >
-                  <i class="bi bi-share-fill"></i>
-                </GlobalButton>
-              </div> */}
+              </div>
             </div>
-            <div class="text-break mt-4">{mapValue(companyDetailsConfig)}</div>
+            <div>
+              {displayItem({
+                title: 'Basic Info',
+                section: 'basicInfo',
+                config: companyDetailsConfig2,
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -396,7 +264,6 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
                               >
                                 Profile
                               </button>
-
                               <button
                                 class="nav-link"
                                 id="nav-jobs-tab"
@@ -425,11 +292,12 @@ function ProfileEmployer({ isLoading, isEmpty, iteme }) {
                               role="tabpanel"
                               aria-labelledby="nav-profile-tab"
                             >
-                              <div class="text-break">
-                                {mapValue(companyDetailsConfig2)}
-                              </div>
+                              {displayItem({
+                                title: 'Business Overview',
+                                section: 'businessOverview',
+                                config: companyDetailsConfig,
+                              })}
                             </div>
-
                             <div
                               class="tab-pane fade"
                               id="nav-jobs"

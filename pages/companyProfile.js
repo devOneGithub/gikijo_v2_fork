@@ -15,11 +15,14 @@ import LoadingSpinner from '../components/LoadingSpinner.js';
 import moment from 'moment';
 import CompanyProfileModal from '../components/CompanyProfileModal.js';
 import EmptyData from '../components/EmptyData.js';
-import CompanyProfileTable from '../components/companyProfileTable.js';
 import { useModal } from '../context/modal.js';
+import CompanyProfileTable from '../components/CompanyProfileTable.js';
+import { useRouter } from 'next/router.js';
+import CompanyProfileForm from '../components/CompanyProfileForm.js';
 
 const main = () => {
-  const { isModalOpen, toggleModal } = useModal();
+  const router = useRouter();
+  const { apiData } = useApiCall();
 
   const createCompanyButton = () => {
     return (
@@ -28,10 +31,15 @@ const main = () => {
           class="btn btn-primary btn-lg"
           type="button"
           onClick={() => {
-            toggleModal('companyProfile');
+            if (apiData.companyProfile?.data?.uid) {
+              router.push(
+                `${PAGES.profile.directory}?type=company&uid=${apiData.companyProfile.data?.uid}`
+              );
+            }
           }}
         >
-          <i class="bi bi-plus-lg"></i> Add Company
+          <i class="fs-5 bi-building me-1"></i> View Profile{' '}
+          <i class="bi bi-arrow-right-short"></i>
         </button>
       </div>
     );
@@ -46,7 +54,7 @@ const main = () => {
           description={PAGES.company_profile.description}
           rightContent={createCompanyButton()}
         />
-        <CompanyProfileTable />
+        <CompanyProfileForm />
       </div>
     </SideBar>
   );
