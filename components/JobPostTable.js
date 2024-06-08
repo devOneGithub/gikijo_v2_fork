@@ -24,9 +24,6 @@ const JobPostTable = () => {
 
   return (
     <>
-      <CompanyProfileModal />
-      <JobPostModal />
-      <SendHistoryModal />
       <div>
         <LoadingSpinner isLoading={apiData.jobPost.isLoading} />
         {!apiData.jobPost.isLoading && apiData.jobPost.data.length == 0 ? (
@@ -223,7 +220,7 @@ const JobPostTable = () => {
                         class={`${data.actionBtnHistory.theme.color} clickable`}
                         onClick={data.actionBtnHistory.click}
                       >
-                        <i class="bi bi-clock-history me-1"></i> Send History
+                        <i class="bi bi-clock-history me-1"></i> History
                       </span>
                     </td>
                     <td>
@@ -231,7 +228,7 @@ const JobPostTable = () => {
                         class="text-primary clickable"
                         onClick={data.viewBtn.click}
                       >
-                        View Live
+                        <i class="bi bi-broadcast me-1"></i> View
                       </span>
                     </td>
                   </tr>

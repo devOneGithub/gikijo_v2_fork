@@ -191,6 +191,13 @@
   background-color: #f8e9e9;
 }
 
+.alert-success {
+  color: rgb(50, 50, 50);
+  border: 1px solid #c3f2d7;
+  background-color: #e9f8ef;
+  padding: 2%;
+}
+
 .transparent-gradient {
   position: absolute;
   bottom: 0;

@@ -14,6 +14,9 @@ import ForgotPasswordModal from '../components/ForgotPasswordModal';
 import LogoutModal from '../components/LogoutModal';
 import { TempDataProvider } from '../context/tempData';
 import ApplyJobModal from '../components/ApplyJobModal';
+import JobPostModal from '../components/JobPostModal';
+import CompanyProfileModal from '../components/CompanyProfileModal';
+import SendHistoryModal from '../components/SendHistoryModal';
 
 export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -31,6 +34,9 @@ export default function MyApp({ Component, pageProps }) {
           <AuthModal />
           <LogoutModal />
           <ApplyJobModal />
+          <JobPostModal />
+          <CompanyProfileModal />
+          <SendHistoryModal />
           <ForgotPasswordModal />
           <main className="main">
             <Component {...pageProps} />

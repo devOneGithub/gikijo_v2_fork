@@ -599,7 +599,7 @@ const JobPostModal = () => {
           <GlobalButton
             btnType="submit"
             btnClass="btn btn-primary btn-lg"
-            btnTitle="Publish Now"
+            btnTitle="Save & Publish"
             btnLoading={buttonConfig.submit.isLoading}
           />
         </>
@@ -631,18 +631,17 @@ const JobPostModal = () => {
                 ) : (
                   ''
                 )}
-                <span>
-                  Your post is live on Gikijo! to get more views, send it to our
-                  suggested channels.
-                </span>
+
+                <div class="alert alert-success small" role="alert">
+                  <span>
+                    <i class="bi bi-broadcast me-1"></i> Your post is now
+                    published on Gikijo. To get more views, send it to our
+                    suggested channels.
+                  </span>
+                </div>
                 <h5 class="mt-3">Send to</h5>
                 <ul class="list-group list-group-flush mt-3">
                   {apiData.allChannel.data?.map((item, index) => {
-                    let channelPost = jobData?.job_post_send_que.find(
-                      (channelPostItem) =>
-                        channelPostItem.channel_id === item.id
-                    );
-
                     let channelIcon = SHARE_CHANNEL.find(
                       (channel) => channel.platform === item.platform
                     );
@@ -654,7 +653,18 @@ const JobPostModal = () => {
                             {channelIcon.icon}
                           </div>
                           <div class="col">
-                            <h6 class="card-title">{item.title}</h6>
+                            <h6 class="card-title">
+                              <span
+                                class="clickable"
+                                onClick={() => {
+                                  if (item?.url) {
+                                    window.open(item.url, '_blank');
+                                  }
+                                }}
+                              >
+                                {item.title}
+                              </span>
+                            </h6>
                             <p
                               class="card-text text-truncate text-muted"
                               style={{ maxWidth: '250px' }}
@@ -665,14 +675,6 @@ const JobPostModal = () => {
                                 ? `RM ${item?.price}/send`
                                 : `RM 0.00/send`}
                             </p>
-                            {channelPost?.message_id ? (
-                              <small class="text-primary clickable">
-                                View your post{' '}
-                                <i class="bi bi-arrow-up-right-circle"></i>
-                              </small>
-                            ) : (
-                              ''
-                            )}
                           </div>
                           <div class="col-auto">
                             <div class="form-check form-switch form-switch-md">
@@ -726,7 +728,7 @@ const JobPostModal = () => {
       ),
       onSubmitFunction: onSubmitShare,
       footer: (
-        <div class="row w-100">
+        <div class="row w-100 m-0">
           <div class="col">
             <small class="text-muted">Total</small>
             {animatedSwipe({

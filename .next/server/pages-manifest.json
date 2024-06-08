@@ -2,7 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/companyProfile": "pages/companyProfile.js",
+  "/jobPost": "pages/jobPost.js",
   "/dashboard": "pages/dashboard.js",
-  "/jobPost": "pages/jobPost.js"
+  "/onboard": "pages/onboard.js",
+  "/viewJob": "pages/viewJob.js"
 }

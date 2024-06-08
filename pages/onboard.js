@@ -12,11 +12,14 @@ import { useModal } from '../context/modal';
 import JobPostTable from '../components/JobPostTable';
 import CompanyProfileTable from '../components/CompanyProfileTable';
 import CompanyProfileForm from '../components/CompanyProfileForm';
+import { useTempData } from '../context/tempData';
+import JobPostModal from '../components/JobPostModal';
 
 const main = () => {
   const { apiData, updateAccountTypeApi, addResumeApi, updateOnboardingApi } =
     useApiCall();
   const { isModalOpen, toggleModal } = useModal();
+  const { tempData, setValueTempData } = useTempData();
   const router = useRouter();
   const [currentSection, setCurrentSection] = useState('getStarted');
   const [isPageReady, setIsPageReady] = useState(false);
@@ -48,7 +51,7 @@ const main = () => {
         });
 
         if (result) {
-          setCurrentSection('createResume');
+          setStep('createResume');
         }
       },
       icon: <i class="bi bi-search-heart h1 text-primary"></i>,
@@ -63,7 +66,7 @@ const main = () => {
         });
 
         if (result) {
-          setCurrentSection('createCompanyProfile');
+          setStep('createCompanyProfile');
         }
       },
       icon: <i class="bi bi-megaphone h1 text-primary"></i>,
@@ -76,7 +79,9 @@ const main = () => {
         {prevPage ? (
           <i
             class="bi bi-arrow-left me-3 clickable"
-            onClick={() => setCurrentSection(prevPage)}
+            onClick={() => {
+              setStep(prevPage);
+            }}
           ></i>
         ) : (
           <i class="bi bi-arrow-left me-3 opacity-25"></i>
@@ -84,7 +89,7 @@ const main = () => {
         {/* {nextPage ? (
           <i
             class="bi bi-arrow-right ms-3 clickable"
-            onClick={() => setCurrentSection(nextPage)}
+            onClick={() => setStep(nextPage)}
           ></i>
         ) : ( */}
         <i class="bi bi-arrow-right ms-3 opacity-25"></i>
@@ -127,7 +132,7 @@ const main = () => {
                   <ResumeForm
                     section={section}
                     onSuccessFunction={() => {
-                      setCurrentSection(nextSection);
+                      setStep(nextSection);
                     }}
                   />
                 ) : (
@@ -137,7 +142,7 @@ const main = () => {
                   <CompanyProfileForm
                     section={section}
                     onSuccessFunction={() => {
-                      setCurrentSection(nextSection);
+                      setStep(nextSection);
                     }}
                   />
                 ) : (
@@ -214,7 +219,7 @@ const main = () => {
       view: (
         <SectionView
           type="employer"
-          title="Create Your First Job Post"
+          title="Create Your Job Post"
           subtitle="Let's Design Your Job Opportunity"
           customBody={
             <>
@@ -225,21 +230,36 @@ const main = () => {
                   <span
                     class="text-primary clickable"
                     onClick={() => {
-                      setCurrentSection('completedEmployer');
+                      setStep('completedEmployer');
                     }}
                   >
                     Skip
                   </span>
                 ) : (
-                  <GlobalButton
-                    btnType="button"
-                    btnClass="btn btn-primary btn-lg me-2"
-                    btnOnClick={() => {
-                      setCurrentSection('completedEmployer');
-                    }}
-                  >
-                    Continue <i class="bi bi-arrow-right-short"></i>
-                  </GlobalButton>
+                  <>
+                    <GlobalButton
+                      btnType="button"
+                      btnClass="btn btn-outline-primary btn-lg me-2"
+                      btnOnClick={() => {
+                        toggleModal('jobPost');
+                        setValueTempData('selectedItem', {
+                          ...tempData.selectedItem,
+                          publishModalConfigType: 'create',
+                        });
+                      }}
+                    >
+                      <i class="bi bi-plus-lg"></i> Create More
+                    </GlobalButton>
+                    <GlobalButton
+                      btnType="button"
+                      btnClass="btn btn-primary btn-lg me-2"
+                      btnOnClick={() => {
+                        setStep('completedEmployer');
+                      }}
+                    >
+                      Continue <i class="bi bi-arrow-right-short"></i>
+                    </GlobalButton>
+                  </>
                 )}
               </div>
             </>
@@ -279,7 +299,7 @@ const main = () => {
                     }
                   }}
                 >
-                  My Company Profile <i class="bi bi-arrow-right-short"></i>
+                  Company Profile <i class="bi bi-arrow-right-short"></i>
                 </GlobalButton>
               </motion.div>
             </div>
@@ -386,7 +406,7 @@ const main = () => {
                   btnType="button"
                   btnClass="btn btn-outline-primary btn-lg"
                   btnOnClick={() => {
-                    setCurrentSection('completedJobSeeker');
+                    setStep('completedJobSeeker');
                   }}
                 >
                   Continue <i class="bi bi-arrow-right-short"></i>
@@ -429,7 +449,7 @@ const main = () => {
                     }
                   }}
                 >
-                  My Profile <i class="bi bi-arrow-right-short"></i>
+                  Profile <i class="bi bi-arrow-right-short"></i>
                 </GlobalButton>
               </motion.div>
             </div>
@@ -439,6 +459,15 @@ const main = () => {
         />
       ),
     },
+  };
+
+  const setStep = (stepName) => {
+    if (stepName in viewConfig) {
+      setCurrentSection(stepName);
+      router.replace(`${router.pathname}?step=${stepName}`);
+    } else {
+      setCurrentSection('getStarted');
+    }
   };
 
   useEffect(() => {
@@ -451,6 +480,9 @@ const main = () => {
           router.push(PAGES.dashboard.directory);
         } else {
           setIsPageReady(true);
+          if (router?.query?.step) {
+            setStep(router?.query?.step);
+          }
         }
       } else {
         setIsPageReady(true);

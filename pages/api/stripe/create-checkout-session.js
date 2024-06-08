@@ -27,8 +27,8 @@ const handler = async (req, res) => {
       //   bulk_send_que: bulkSendQue,
       // },
       mode: 'payment',
-      success_url: `${req.headers.origin}/${PAGES.job_post.directory}`,
-      cancel_url: `${req.headers.origin}/${PAGES.job_post.directory}`,
+      success_url: `${req.headers.referer}`,
+      cancel_url: `${req.headers.referer}`,
     });
 
     if (session) {
