@@ -3,9 +3,9 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/jobs": "pages/jobs.js",
-  "/jobPost": "pages/jobPost.js",
   "/applicants": "pages/applicants.js",
-  "/viewJob": "pages/viewJob.js",
-  "/api/job-post/publish": "pages/api/job-post/publish.js",
-  "/dashboard": "pages/dashboard.js"
+  "/dashboard": "pages/dashboard.js",
+  "/api/job-post/get-post": "pages/api/job-post/get-post.js",
+  "/": "pages/index.js",
+  "/profile": "pages/profile.js"
 }
