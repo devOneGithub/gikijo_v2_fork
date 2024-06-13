@@ -58,29 +58,29 @@ const main = () => {
   const overviewConfigTop = {
     cardOne: {
       employer: {
-        title: 'To do',
+        title: 'Company Profile',
         onClick: () => {
-          router.push(PAGES.company_profile.directory);
+          router.push(PAGES.profile.directory);
         },
-        description: 'Update Company Profile',
+        description: 'Manage your company profile',
         icon: <i class="bi bi-building h1 text-white"></i>,
       },
       job_seeker: {
-        title: 'Manage Profile',
+        title: 'My Profile',
         onClick: () => {
-          router.push(PAGES.manage_profile.directory);
+          router.push(PAGES.profile.directory);
         },
-        description: 'Customize your personal information.',
-        icon: <i class="bi bi-file-earmark-person h1 text-white"></i>,
+        description: 'Manage your user profile',
+        icon: <i class="bi bi-file-earmark-person h1"></i>,
       },
     },
     cardTwo: {
       employer: {
-        title: 'To do',
+        title: 'Job Post',
         onClick: () => {
           router.push(PAGES.job_post.directory);
         },
-        description: 'Create Post',
+        description: 'Manage your job post',
         icon: <i class="bi bi-megaphone h1 text-white"></i>,
       },
       job_seeker: {
@@ -88,8 +88,8 @@ const main = () => {
         onClick: () => {
           router.push(PAGES.application.directory);
         },
-        description: 'Carry on applying to jobs.',
-        icon: <i class="bi bi-file-earmark-arrow-up h1 text-white"></i>,
+        description: 'Check your application status',
+        icon: <i class="bi bi-file-earmark-arrow-up h1"></i>,
       },
     },
   };
@@ -137,7 +137,7 @@ const main = () => {
         onClick: () => {
           router.push(PAGES.applicants.directory);
         },
-        total: applicationData.length,
+        total: countApplications,
         icon: <i class="bi bi-people h5 text-secondary me-2" />,
       },
       job_seeker: {
@@ -204,28 +204,6 @@ const main = () => {
     return (
       <div class="col">
         <div class="row mb-2 g-2">
-          {Object.values(overviewConfigTop).map((config, index) => (
-            <div key={index} class="col-lg">
-              {config[type] ? (
-                <div onClick={config[type]?.onClick}>
-                  <div class="card card-move card-action-btn" id="find-job-btn">
-                    <div class="card-body row">
-                      <div class="col-9">
-                        <small>{config[type]?.title}</small>
-                        <h6 class="card-text">{config[type]?.description}</h6>
-                      </div>
-                      <div class="col text-center">{config[type]?.icon}</div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <></>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div class="row g-2">
           {Object.values(overviewConfigBottom).map((config, index) => (
             <>
               {config[type] ? (
@@ -325,116 +303,43 @@ const main = () => {
   };
 
   const quickAccessConfig = {
-    cardOne: {
-      // employer: {
-      //   title: 'Last Company Profile',
-      //   list: (
-      //     <>
-      //       {companyData.length > 0 ? (
-      //         <ul class="list-unstyled bg-light rounded-2 p-2">
-      //           <li>
-      //             <small class="text-muted">Company</small>
-      //             <p
-      //               class="fw-bold mb-0 text-truncate"
-      //               style={{ maxWidth: '200px' }}
-      //             >
-      //               {companyData[0]?.company_name || '-'}
-      //             </p>
-      //           </li>
-      //         </ul>
-      //       ) : (
-      //         <></>
-      //       )}
-      //     </>
-      //   ),
-      //   description: (
-      //     <p>
-      //       {!companyIsLoading
-      //         ? companyData.length > 0
-      //           ? `You have ${companyData.length} company profile set
-      //           up now.`
-      //           : `Create your first company profile`
-      //         : 'Loading...'}
-      //     </p>
-      //   ),
-      //   button: (
-      //     <GlobalButton
-      //       btnType="button"
-      //       btnClass="btn btn-outline-primary btn-blog w-100"
-      //       btnOnClick={() => {
-      //         router.push(PAGES.company_profile.directory);
-      //       }}
-      //     >
-      //       <i class="bi bi-plus-lg"></i> Add Company
-      //     </GlobalButton>
-      //   ),
-      // },
+    cardZero: {
       job_seeker: {
-        title: 'My Profile',
+        title: 'Find Job',
+        description: (
+          <p>
+            {!resumeIsLoading
+              ? `Keep looking for jobs that suit you and apply to them. This will improve your chances of getting hired.`
+              : 'Loading...'}
+          </p>
+        ),
+        button: (
+          <GlobalButton
+            btnType="button"
+            btnClass="btn btn-outline-primary btn-blog w-100"
+            btnOnClick={() => {
+              router.push(PAGES.jobs.directory);
+            }}
+          >
+            <i class="bi bi-search me-1"></i> Find Job
+          </GlobalButton>
+        ),
+      },
+    },
+    cardOne: {
+      employer: {
+        title: 'Company Profile',
         list: (
           <>
-            {companyData.length > 0 ? (
+            {!companyIsLoading ? (
               <ul class="list-unstyled bg-light rounded-2 p-2">
                 <li>
-                  <small class="text-muted">Full Name</small>
+                  <small class="text-muted">Company Name</small>
                   <p
                     class="fw-bold mb-0 text-truncate"
                     style={{ maxWidth: '200px' }}
                   >
-                    {resumeData?.full_name || '-'}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Current Job Status</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {getDisplayValue(
-                      findInArray(
-                        CURRENT_JOB_STATUS,
-                        'value',
-                        resumeData?.current_job_status
-                      ),
-                      'name',
-                      ''
-                    )}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Total Work Experience</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {resumeData?.work_experience?.length || '-'}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Total Education History</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {resumeData?.education_background?.length || '-'}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Total Skills</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {resumeData?.skills?.length || '-'}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Total Languages</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {resumeData?.languages?.length || '-'}
+                    {companyData?.company_name || '-'}
                   </p>
                 </li>
               </ul>
@@ -445,9 +350,8 @@ const main = () => {
         ),
         description: (
           <p>
-            {!resumeIsLoading
-              ? `Keeping your profile up-to-date allows you to showcase your most recent accomplishments. This helps you market yourself effectively.`
-              : 'Loading...'}
+            Keep your company profile current with the latest updates to engage
+            the best candidates.
           </p>
         ),
         button: (
@@ -455,10 +359,49 @@ const main = () => {
             btnType="button"
             btnClass="btn btn-outline-primary btn-blog w-100"
             btnOnClick={() => {
-              router.push(PAGES.manage_profile.directory);
+              router.push(`${PAGES.job_post.directory}?createPost=true`);
             }}
           >
-            <i class="bi bi-pencil"></i> Manage Profile
+            <i class="bi bi-plus-lg me-1"></i> Create Post
+          </GlobalButton>
+        ),
+      },
+      job_seeker: {
+        title: 'My Profile',
+        list: (
+          <>
+            {!resumeIsLoading && resumeData ? (
+              <ul class="list-unstyled bg-light rounded-2 p-2">
+                <li>
+                  <small class="text-muted">Full Name</small>
+                  <p
+                    class="fw-bold mb-0 text-truncate"
+                    style={{ maxWidth: '200px' }}
+                  >
+                    {resumeData?.full_name || '-'}
+                  </p>
+                </li>
+              </ul>
+            ) : (
+              <></>
+            )}
+          </>
+        ),
+        description: (
+          <p>
+            Regularly update your profile with your latest accomplishments to
+            market yourself effectively.
+          </p>
+        ),
+        button: (
+          <GlobalButton
+            btnType="button"
+            btnClass="btn btn-outline-primary btn-blog w-100"
+            btnOnClick={() => {
+              router.push(PAGES.profile.directory);
+            }}
+          >
+            <i class="bi bi-person-circle me-1"></i> View Profile
           </GlobalButton>
         ),
       },
@@ -489,7 +432,7 @@ const main = () => {
           <p>
             {!jobPostIsLoading
               ? jobPostData.length > 0
-                ? `You have ${jobPostData.length} job postings right now. Create more job posts and share it on all of our channels!`
+                ? `You have ${jobPostData.length} job post right now. Create more job post and share it on all of our channels!`
                 : `Create and publish your first job post today and share it on all of our channels!`
               : 'Loading...'}
           </p>
@@ -499,10 +442,10 @@ const main = () => {
             btnType="button"
             btnClass="btn btn-outline-primary btn-blog w-100"
             btnOnClick={() => {
-              router.push(PAGES.job_post.directory);
+              router.push(`${PAGES.job_post.directory}?createPost=true`);
             }}
           >
-            <i class="bi bi-plus-lg"></i> Create Post
+            <i class="bi bi-plus-lg me-1"></i> Create Post
           </GlobalButton>
         ),
       },
@@ -521,63 +464,6 @@ const main = () => {
                     {applicationData[0]?.job_post?.title || '-'}
                   </p>
                 </li>
-                <li>
-                  <small class="text-muted">Type</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {getDisplayValue(
-                      findInArray(
-                        EMPLOYMENT_TYPES,
-                        'value',
-                        applicationData[0]?.job_post?.employment_type
-                      ),
-                      'name',
-                      ''
-                    )}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Company</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {getDisplayValue(
-                      applicationData[0]?.job_post?.company_profile,
-                      'company_name',
-                      '-'
-                    )}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Salary</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {`RM ${applicationData[0]?.job_post?.min_salary} -  ${applicationData[0]?.job_post?.max_salary}`}
-                  </p>
-                </li>
-                <li>
-                  <small class="text-muted">Location</small>
-                  <p
-                    class="fw-bold mb-0 text-truncate"
-                    style={{ maxWidth: '200px' }}
-                  >
-                    {applicationData[0]?.job_post?.company_profile?.state
-                      ? `${applicationData[0]?.job_post?.company_profile.state}, `
-                      : ''}
-                    {
-                      findInArray(
-                        COUNTRIES,
-                        'value',
-                        applicationData[0]?.job_post?.company_profile?.country
-                      )?.name
-                    }
-                  </p>
-                </li>
               </ul>
             ) : (
               <></>
@@ -588,7 +474,7 @@ const main = () => {
           <p>
             {!applicationIsLoading
               ? applicationData.length > 0
-                ? `Congratulations on submitting your application! make sure to keep track of any updates on the status of your application from the employer.`
+                ? `Congratulations on submitting your application! make sure to keep track of any updates on the status of your application.`
                 : `Keep looking for jobs that suit you and apply to them. This will improve your chances of getting hired.`
               : 'Loading...'}
           </p>
@@ -601,7 +487,7 @@ const main = () => {
               router.push(PAGES.application.directory);
             }}
           >
-            <i class="bi bi-file-earmark-arrow-up"></i> View Application
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> View Application
           </GlobalButton>
         ),
       },
@@ -633,7 +519,7 @@ const main = () => {
           <p>
             {!jobPostIsLoading
               ? countApplications > 0
-                ? `Congrats! you currently have ${countApplications} application. you can manage it through your applicants page.`
+                ? `You currently have ${countApplications} application. you can manage it through your applicants page.`
                 : `You have ${countApplications} application right now, you can manage it through your applicants page.`
               : 'Loading...'}
           </p>
@@ -646,7 +532,7 @@ const main = () => {
               router.push(PAGES.applicants.directory);
             }}
           >
-            <i class="bi bi-people"></i> Applicants
+            <i class="bi bi-people me-1"></i> View Applicants
           </GlobalButton>
         ),
       },
@@ -656,6 +542,28 @@ const main = () => {
   const quickAccessCard = (type) => {
     return (
       <div className="row g-2">
+        {/* <div class="row g-2">
+          {Object.values(overviewConfigTop).map((config, index) => (
+            <div key={index} class="col-lg">
+              {config[type] ? (
+                <div onClick={config[type]?.onClick}>
+                  <div class="card card-move " id="find-job-btn">
+                    <div class="card-body row">
+                      <div class="col text-center">{config[type]?.icon}</div>
+                      <div class="col-9">
+                        <h6 class="card-text mb-0">{config[type]?.title}</h6>
+                        <small>{config[type]?.description}</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <></>
+              )}
+            </div>
+          ))}
+        </div> */}
+
         {Object.values(quickAccessConfig).map((config, index) => (
           <>
             {config[type] ? (
@@ -728,44 +636,6 @@ const main = () => {
     );
   };
 
-  const profileCard = () => {
-    return (
-      <div class="col d-grid gap-2 d-md-flex justify-content-md-end">
-        {apiData.profile.data?.account_type == 'job_seeker' ? (
-          <GlobalButton
-            btnType="button"
-            btnClass="btn btn-primary btn-lg tour-resume-profile"
-            btnOnClick={() => {
-              if (apiData.resume?.data?.uid) {
-                router.push(
-                  `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
-                );
-              }
-            }}
-          >
-            <i class="fs-5 bi-person-circle me-1"></i> View Profile{' '}
-            <i class="bi bi-arrow-right-short"></i>
-          </GlobalButton>
-        ) : (
-          <GlobalButton
-            btnType="button"
-            btnClass="btn btn-primary btn-lg tour-company-profile"
-            btnOnClick={() => {
-              if (apiData.companyProfile?.data?.uid) {
-                router.push(
-                  `${PAGES.profile.directory}?type=company&uid=${apiData.companyProfile?.data?.uid}`
-                );
-              }
-            }}
-          >
-            <i class="fs-5 bi-building me-1"></i> View Profile{' '}
-            <i class="bi bi-arrow-right-short"></i>
-          </GlobalButton>
-        )}
-      </div>
-    );
-  };
-
   useEffect(() => {
     if (apiData.profile.isLoading == false) {
       if (
@@ -820,27 +690,31 @@ const main = () => {
       <div class="container ps-0">
         <Breadcrumb page={PAGES.dashboard} />
         <PageHeader
-          title={`Hello, ${apiData.profile.data?.username}!`}
+          title={`Hello${
+            apiData.profile.data?.username
+              ? `, ${apiData.profile.data.username}`
+              : ''
+          }!`}
           description={PAGES.dashboard.description}
-          rightContent={profileCard()}
         />
         <div class="row">
-          <div class="row mb-4">
-            <div class="col-md-8 mb-3 tour-overview">
+          <div class="col-md-8 mb-3">
+            <div class="mb-3 tour-overview">
               <h6>Overview</h6>
               {overviewCard(apiData.profile.data?.account_type)}
             </div>
+            <div class="tour-quick-access">
+              <h6>Quick Access</h6>
+              {quickAccessCard(apiData.profile.data?.account_type)}
+            </div>
+          </div>
+          <div class="col">
             <div class="col tour-notification">
               <h6>Notifications</h6>
               {notificationCard()}
             </div>
           </div>
-
-          <div class="row mb-4">
-            <div class="col-md-8 mb-3 tour-quick-access">
-              <h6>Quick Access</h6>
-              {quickAccessCard(apiData.profile.data?.account_type)}
-            </div>
+          {/* <div class="row mb-4">
             {apiData.profile.data?.account_type == 'employer' ? (
               <div class="col tour-channel">
                 <h6>Channels</h6>
@@ -849,7 +723,7 @@ const main = () => {
             ) : (
               ''
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </SideBar>

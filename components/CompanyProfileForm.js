@@ -24,8 +24,6 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
   const [formValue, setFormValue] = useState({
     company_name: '',
     registration_number: '',
-    about_us: '',
-    size: '',
     website: '',
     address_1: '',
     address_2: '',
@@ -34,6 +32,8 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
     state: '',
     country: '',
     agree_to_term: '',
+    about_us: '',
+    size: '',
   });
 
   const [arrayElements, setArrayElements] = useState({
@@ -68,7 +68,7 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
       setFormValue(updatedFormValue);
 
       var myIndustries = [];
-      companyData?.industries.forEach((item) => {
+      companyData?.industries?.forEach((item) => {
         const result = INDUSTRIES.find((industry) => industry.value === item);
         if (result) {
           myIndustries.push({ label: result.name, value: result.value });
@@ -82,63 +82,6 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
     }
   }, [apiData.companyProfile?.data]);
 
-  const onSubmitCompanyProfile = async (event, keyName) => {
-    event.preventDefault();
-
-    setButtonConfig((prevState) => ({
-      ...prevState,
-      [keyName]: {
-        ...prevState[keyName],
-        submit: {
-          ...prevState[keyName].submit,
-          isLoading: true,
-        },
-      },
-    }));
-
-    const addData = formValue;
-
-    addData.industries = arrayElements.industries.map((item) => item.value);
-    addData.uid = apiData.companyProfile.data?.uid ?? null;
-
-    // Remove undefined properties
-    Object.keys(addData).forEach(
-      (key) =>
-        addData[key] === undefined ||
-        (addData[key] === '' && delete addData[key])
-    );
-
-    var success = false;
-
-    const result = await addCompanyProfileApi({
-      postData: addData,
-    });
-
-    if (result) {
-      success = true;
-    }
-
-    setButtonConfig((prevState) => ({
-      ...prevState,
-      [keyName]: {
-        ...prevState[keyName],
-        submit: {
-          ...prevState[keyName].submit,
-          isLoading: false,
-        },
-      },
-    }));
-
-    if (success) {
-      toast.success('Saved!');
-      if (section && onSuccessFunction) {
-        onSuccessFunction();
-      } else {
-        toggleModal('editResume');
-      }
-    }
-  };
-
   const handleChange = (field) => (event) => {
     const { type, value, checked } = event.target;
     setFormValue((prevFormValue) => ({
@@ -150,6 +93,18 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
   const configForm = {
     basicInfo: {
       title: 'Basic Info',
+      inputValue: {
+        company_name: formValue.company_name,
+        registration_number: formValue.registration_number,
+        website: formValue.website,
+        address_1: formValue.address_1,
+        address_2: formValue.address_2,
+        city: formValue.city,
+        postcode: formValue.postcode,
+        state: formValue.state,
+        country: formValue.country,
+        agree_to_term: formValue.agree_to_term,
+      },
       formView: (
         <>
           <form
@@ -302,6 +257,11 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
     },
     businessOverview: {
       title: 'Business Overview',
+      inputValue: {
+        about_us: formValue.about_us,
+        industries: arrayElements.industries.map((item) => item.value),
+        size: formValue.size,
+      },
       formView: (
         <>
           <form
@@ -383,6 +343,64 @@ const CompanyProfileForm = ({ section = null, onSuccessFunction = null }) => {
         </>
       ),
     },
+  };
+
+  const onSubmitCompanyProfile = async (event, keyName) => {
+    event.preventDefault();
+
+    setButtonConfig((prevState) => ({
+      ...prevState,
+      [keyName]: {
+        ...prevState[keyName],
+        submit: {
+          ...prevState[keyName].submit,
+          isLoading: true,
+        },
+      },
+    }));
+
+    let addData = null;
+    if (section) {
+      addData = configForm[section].inputValue;
+    } else {
+      Object.keys(configForm).forEach((key) => {
+        if (configForm[key].inputValue) {
+          addData = { ...addData, ...configForm[key].inputValue };
+        }
+      });
+    }
+
+    addData.uid = apiData.companyProfile.data?.uid ?? null;
+
+    var success = false;
+
+    const result = await addCompanyProfileApi({
+      postData: addData,
+    });
+
+    if (result) {
+      success = true;
+    }
+
+    setButtonConfig((prevState) => ({
+      ...prevState,
+      [keyName]: {
+        ...prevState[keyName],
+        submit: {
+          ...prevState[keyName].submit,
+          isLoading: false,
+        },
+      },
+    }));
+
+    if (success) {
+      toast.success('Saved!');
+      if (section && onSuccessFunction) {
+        onSuccessFunction();
+      } else {
+        toggleModal('editResume');
+      }
+    }
   };
 
   if (section) {

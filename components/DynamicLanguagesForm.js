@@ -65,6 +65,9 @@ function DynamicLanguagesForm({ arrayElements, setArrayElements }) {
                 onChange={(e) => handleInputChange('level', index, e)}
                 required
               >
+                <option value="" disabled>
+                  Please select
+                </option>
                 {LANGUAGE_LEVELS.map((item, index) => {
                   return (
                     <option value={item.value} key={index}>

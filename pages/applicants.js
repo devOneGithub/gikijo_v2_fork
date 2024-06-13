@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import SideBar from '../components/SideBar.js';
 import JobPostModal from '../components/JobPostModal.js';
 import PageHeader from '../components/PageHeader.js';
+import Offcanvas from 'react-bootstrap/Offcanvas';
 import { APPLICATION_STATUS, IMAGES, PAGES } from '../utils/constants.js';
 import Breadcrumb from '../components/BreadCrumb.js';
 import { useApiCall } from '../context/apiCall.js';
@@ -9,45 +10,66 @@ import moment from 'moment';
 import ApplicationModal from '../components/ApplicationModal.js';
 import LoadingSpinner from '../components/LoadingSpinner.js';
 import EmptyData from '../components/EmptyData.js';
+import JobDetails from '../components/JobDetails.js';
 
 const main = () => {
   const { apiData } = useApiCall();
+
   const [toggleModal, setToggleModal] = useState({
     application: false,
   });
 
+  const [selectedJob, setSelectedJob] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
 
-  const Applicant = ({ applicant, jobTitle }) => {
+  const handleClose = (key) => {
+    setToggleModal((prevState) => ({
+      ...prevState,
+      [key]: false,
+    }));
+  };
+
+  const Applicant = ({ applicant, jobData }) => {
+    const openProfile = () => {
+      window.open(
+        `${PAGES.profile.directory}?type=resume&uid=${applicant.resume_uid}`,
+        '_blank'
+      );
+    };
+
     return (
       <tr className="align-middle">
-        <th scope="row">
+        <th scope="row" class="col-3">
           <div className="row">
-            <div className="col-auto">
+            {/* <div className="col-auto clickable" onClick={openProfile}>
               <img
                 className="rounded-circle border justify-content-center align-items-center avatar"
                 src={IMAGES.applicant_placeholder.url}
                 alt="Applicant Avatar"
-              />
-            </div>
+              /> 
+            </div> */}
             <div className="col">
               <div className="row">
-                <div className="col">{applicant.fullName}</div>
+                <div className="col clickable" onClick={openProfile}>
+                  <i className="bi bi-person-circle clickable me-1"></i>{' '}
+                  {applicant.fullName}
+                </div>
               </div>
               <div className="row">
                 <small>
                   <div className="col fw-light text-muted">
                     <small>
-                      {applicant.createdAt}
+                      Applied {applicant.createdAt}
                       <i className="bi bi-dot"></i>
                       {applicant.state}
                     </small>
                     <div className="row mt-2">
                       <div>
-                        <i className="bi bi-envelope"></i> {applicant.email}
+                        <i className="bi bi-envelope me-1"></i>{' '}
+                        {applicant.email}
                       </div>
                       <div>
-                        <i className="bi bi-telephone"></i>{' '}
+                        <i className="bi bi-telephone me-1"></i>{' '}
                         {applicant.phoneNumber}
                       </div>
                     </div>
@@ -60,25 +82,62 @@ const main = () => {
         <td>
           <small className="fw-light">Applied for</small>
           <br />
-          {jobTitle}
+          <span
+            onClick={() => {
+              if (jobData) {
+                setToggleModal({
+                  ...toggleModal,
+                  jobDetails: true,
+                });
+                setSelectedJob(jobData);
+              }
+            }}
+            class="clickable"
+          >
+            {jobData.title}
+          </span>
+          {applicant.applicant_remarks ? (
+            <>
+              <br />
+              <span class="text-muted small">
+                <i class="bi bi-chat-left-text me-1"></i>{' '}
+                {applicant.applicant_remarks}
+              </span>
+            </>
+          ) : (
+            ''
+          )}
         </td>
         <td>
           {applicant.application_action_status == 'withdraw' ? (
             <span class="text-muted">Application Withdrawn</span>
           ) : (
-            <strong
-              className="text-primary fw-bold clickable"
-              onClick={() => {
-                setToggleModal({
-                  ...toggleModal,
-                  application: true,
-                });
-                setSelectedApplication(applicant);
-              }}
-            >
-              {applicant.applicationStatusName}{' '}
-              <i className="bi bi-pencil clickable text-primary"></i>
-            </strong>
+            <>
+              <small className="fw-light">Action</small>
+              <br />
+              <strong
+                className="text-primary fw-bold clickable"
+                onClick={() => {
+                  setToggleModal({
+                    ...toggleModal,
+                    application: true,
+                  });
+                  setSelectedApplication(applicant);
+                }}
+              >
+                {applicant.applicationStatusName}{' '}
+                <i className="bi bi-pencil clickable text-primary"></i>
+              </strong>
+              <br />
+              {applicant.employer_remarks ? (
+                <span class="text-muted small">
+                  <i class="bi bi-chat-right-text me-1"></i>{' '}
+                  {applicant.employer_remarks}
+                </span>
+              ) : (
+                ''
+              )}
+            </>
           )}
         </td>
       </tr>
@@ -118,6 +177,10 @@ const main = () => {
               {apiData.jobPost.data?.map((jobPost, index) =>
                 jobPost.application.map((application, index2) => {
                   const applicant = {
+                    employer_remarks: application.employer_remarks,
+                    applicant_remarks: application.applicant_remarks,
+                    applicant_uuid: application.user_uuid,
+                    resume_uid: application.resume.uid,
                     id: application.id,
                     createdAt: moment(application.created_at).fromNow(),
                     fullName: application.resume.full_name,
@@ -140,7 +203,7 @@ const main = () => {
                     <Applicant
                       key={`${index}-${index2}`} // Assign a unique key using index values
                       applicant={applicant}
-                      jobTitle={jobPost.title}
+                      jobData={jobPost}
                     />
                   );
                 })
@@ -148,6 +211,18 @@ const main = () => {
             </tbody>
           </table>
         )}
+        <Offcanvas
+          show={toggleModal.jobDetails}
+          onHide={() => {
+            handleClose('jobDetails');
+          }}
+          placement="end"
+        >
+          <Offcanvas.Header closeButton></Offcanvas.Header>
+          <Offcanvas.Body>
+            <JobDetails item={selectedJob} />
+          </Offcanvas.Body>
+        </Offcanvas>
       </div>
     </SideBar>
   );

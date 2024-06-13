@@ -17,7 +17,7 @@ export const TempDataProvider = ({ children }) => {
       shareJobUrl: '',
     },
     selectedItem: {
-      jobDetails: '',
+      jobDetails: null,
       editJobDetails: null,
       editCompanyProfile: null,
       applyJob: null,

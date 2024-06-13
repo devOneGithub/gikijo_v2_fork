@@ -25,7 +25,11 @@ function JobDeckCard() {
         {!isEmpty && (
           <div class="row row-cols-1 row-cols-md-3 g-4">
             {item.map((item, index) => (
-              <AnimatedComponent key={index} stageIndex={index}>
+              <AnimatedComponent
+                key={index}
+                stageIndex={index}
+                animateByIndex={true}
+              >
                 <div class="col">
                   <div
                     onClick={() => {

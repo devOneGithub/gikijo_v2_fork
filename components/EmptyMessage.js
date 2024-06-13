@@ -3,7 +3,10 @@ function EmptyMessage() {
     <div id="content-list-empty">
       <div className="container mt-3">
         <div className="row justify-content-center align-items-center">
-          <p>Sorry, we couldn't find any results at the moment.</p>
+          <p class="text-muted">
+            <i class="bi bi-exclamation-circle me-1"></i> Sorry, we couldn't
+            find any results.
+          </p>
         </div>
       </div>
     </div>

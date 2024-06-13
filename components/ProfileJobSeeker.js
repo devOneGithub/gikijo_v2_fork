@@ -6,6 +6,7 @@ import {
   COUNTRIES,
   CURRENT_JOB_STATUS,
   EMPLOYMENT_TYPES,
+  GENDERS,
   INDUSTRIES,
   LANGUAGE_LEVELS,
   PAGES,
@@ -94,7 +95,11 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
     // },
     gender: {
       title: 'Gender',
-      value: getDisplayValue(item, 'gender'),
+      value: getDisplayValue(
+        findInArray(GENDERS, 'value', item?.gender),
+        'name',
+        ''
+      ),
     },
     dateOfBirth: {
       title: 'Date of Birth',
@@ -244,14 +249,17 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
     });
   };
 
-  const displayItem = ({ title = '', section = '', config = null }) => {
+  const checkIsOwnerResume = () => {
     let isOwnerResume = false;
     if (item?.uid && apiData.resume.data?.uid) {
       if (item.uid === apiData.resume.data.uid) {
         isOwnerResume = true;
       }
     }
+    return isOwnerResume;
+  };
 
+  const displayItem = ({ title = '', section = '', config = null }) => {
     const handleEditClick = () => {
       toggleModal('editResume');
       setModalConfig({ title, section });
@@ -259,11 +267,11 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
 
     return (
       <>
-        {isOwnerResume && (
+        {checkIsOwnerResume() && (
           <div class="d-flex">
             <strong class="flex-grow-1 text-muted">{title}</strong>
             <span class="text-primary clickable" onClick={handleEditClick}>
-              <i class="bi bi-pencil me-1"></i> Edit
+              <i class="bi bi-pencil"></i>
             </span>
           </div>
         )}
@@ -311,17 +319,19 @@ function ProfileJobSeeker({ isLoading, isEmpty, item, onSuccessFunction }) {
                   </div>
                 </div>
               </div>
-              <div class="mt-4">
-                <GlobalButton
-                  btnType="button"
-                  btnClass="btn btn-outline-primary w-100"
-                  btnOnClick={() => {
-                    router.push(PAGES.dashboard.directory);
-                  }}
-                >
-                  <i class="bi-bar-chart-line px-2"></i> View Dashboard
-                </GlobalButton>
-              </div>
+              {checkIsOwnerResume() && (
+                <div class="mt-4">
+                  <GlobalButton
+                    btnType="button"
+                    btnClass="btn btn-primary w-100"
+                    btnOnClick={() => {
+                      router.push(PAGES.dashboard.directory);
+                    }}
+                  >
+                    <i class="bi-bar-chart-line px-2"></i> View Dashboard
+                  </GlobalButton>
+                </div>
+              )}
             </div>
             {displayItem({
               title: 'Job Details',

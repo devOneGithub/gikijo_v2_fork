@@ -215,7 +215,7 @@ function ProfileEmployer({ isLoading, isEmpty, item, onSuccessFunction }) {
               <div class="mt-4">
                 <GlobalButton
                   btnType="button"
-                  btnClass="btn btn-outline-primary w-100"
+                  btnClass="btn btn-primary w-100"
                   btnOnClick={() => {
                     router.push(PAGES.dashboard.directory);
                   }}

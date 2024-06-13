@@ -293,9 +293,7 @@ const main = () => {
                     });
 
                     if (result) {
-                      router.push(
-                        `${PAGES.profile.directory}?type=company&uid=${apiData.companyProfile?.data?.uid}`
-                      );
+                      router.push(PAGES.profile.directory);
                     }
                   }}
                 >
@@ -443,13 +441,11 @@ const main = () => {
                     });
 
                     if (result) {
-                      router.push(
-                        `${PAGES.profile.directory}?type=resume&uid=${apiData.resume?.data?.uid}`
-                      );
+                      router.push(PAGES.profile.directory);
                     }
                   }}
                 >
-                  Profile <i class="bi bi-arrow-right-short"></i>
+                  View Profile <i class="bi bi-arrow-right-short"></i>
                 </GlobalButton>
               </motion.div>
             </div>

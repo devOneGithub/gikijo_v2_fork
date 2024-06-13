@@ -18,6 +18,12 @@ const Index = () => {
   const { isModalOpen, toggleModal } = useModal();
   const router = useRouter();
 
+  useEffect(() => {
+    setTimeout(() => {
+      toggleModal('news');
+    }, 500);
+  }, []);
+
   const mainAccessConfig = {
     cardOne: {
       title: 'Find Job',

@@ -2,8 +2,10 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/jobs": "pages/jobs.js",
   "/jobPost": "pages/jobPost.js",
-  "/dashboard": "pages/dashboard.js",
-  "/onboard": "pages/onboard.js",
-  "/viewJob": "pages/viewJob.js"
+  "/applicants": "pages/applicants.js",
+  "/viewJob": "pages/viewJob.js",
+  "/api/job-post/publish": "pages/api/job-post/publish.js",
+  "/dashboard": "pages/dashboard.js"
 }

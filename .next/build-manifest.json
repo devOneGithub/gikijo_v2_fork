@@ -22,20 +22,25 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/applicants": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/applicants.js"
+    ],
+    "/dashboard": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/dashboard.js"
+    ],
     "/jobPost": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/jobPost.js"
     ],
-    "/onboard": [
+    "/jobs": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/onboard.js"
-    ],
-    "/viewJob": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/viewJob.js"
+      "static/chunks/pages/jobs.js"
     ]
   },
   "ampFirstPages": []

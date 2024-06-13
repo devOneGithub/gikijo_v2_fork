@@ -4,6 +4,7 @@ const GlobalButton = ({
   btnType = 'button',
   btnClass = 'btn btn-primary',
   btnLoading = false,
+  btnHideLoading = false,
   children,
 }) => {
   return (
@@ -13,7 +14,7 @@ const GlobalButton = ({
       onClick={btnOnClick}
       disabled={btnLoading}
     >
-      {btnLoading ? (
+      {btnLoading && !btnHideLoading ? (
         <span
           class="spinner-border spinner-border-sm me-2"
           role="status"

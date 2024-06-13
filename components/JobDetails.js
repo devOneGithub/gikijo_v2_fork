@@ -92,7 +92,7 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
             <EmptyData
               icon={<i class="fs-1 bi bi-rocket-takeoff"></i>}
               title="Start Your Job Journey"
-              description="Click on any job post to see more information!"
+              description="Click on any job post for more details."
             />
           </div>
         )}
@@ -103,7 +103,9 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                 <div class="d-flex flex-wrap mb-2">
                   <div class="flex-grow-1 mb-1">
                     <h5 class="mb-0">
-                      <strong class="card-title h3">{selectedJob.title}</strong>
+                      <strong class="card-title h3">
+                        {selectedJob?.title}
+                      </strong>
                     </h5>
                     <div>
                       <label class="small text-muted">
@@ -126,6 +128,14 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                       btnLoading={buttonConfig.apply.isLoading}
                       btnOnClick={() => {
                         if (logedIn) {
+                          if (
+                            apiData.profile.data?.account_type !== 'job_seeker'
+                          ) {
+                            toast.error(
+                              'Oops! only job seekers can apply for jobs.'
+                            );
+                            return;
+                          }
                           toggleModal('applyJob');
                           setValueTempData('selectedItem', {
                             ...tempData.selectedItem,
@@ -144,8 +154,8 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                       {jobData.isApplied
                         ? 'Applied'
                         : logedIn
-                        ? 'Apply Now'
-                        : 'Login to Apply'}
+                        ? 'Apply this job'
+                        : 'Apply this job'}
                     </GlobalButton>
                     {showBtnExternalPage ? (
                       <GlobalButton
@@ -172,7 +182,7 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                         toggleModal('shareJob');
                         setValueTempData('links', {
                           ...tempData.links,
-                          shareJobUrl: `${process.env.NEXT_PUBLIC_DOMAIN_URL}${PAGES.viewJob.directory}?jobId=${item.uid}`,
+                          shareJobUrl: `${process.env.NEXT_PUBLIC_DOMAIN_URL}${PAGES.viewJob.directory}?jobId=${selectedJob.uid}`,
                         });
                       }}
                     >
@@ -235,7 +245,9 @@ function JobDetails({ isLoading, showBtnExternalPage = true, item = null }) {
                     <li class="mb-3">
                       <label class="small text-muted">Industries</label>
                       <div class="mb-0 text-truncate">
-                        {jobData.industries.join(', ')}
+                        {jobData.industries.length > 0
+                          ? jobData.industries.join(', ')
+                          : ''}
                       </div>
                     </li>
                     <li class="mb-3">

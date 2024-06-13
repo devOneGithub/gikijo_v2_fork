@@ -5,12 +5,14 @@ import { supabase } from '../utils/supabase';
 import { useRouter } from 'next/router';
 import { PAGES } from '../utils/constants';
 import { generateUniqueID } from '../utils/helper';
+import { usePathname } from 'next/navigation';
 
 const ApiCallContext = createContext();
 
 export const useApiCall = () => useContext(ApiCallContext);
 
 export const ApiCallProvider = ({ children }) => {
+  const pathname = usePathname();
   const router = useRouter();
   const [mainData, setMainData] = useState({
     topCompanyProfile: {
@@ -117,6 +119,8 @@ export const ApiCallProvider = ({ children }) => {
           },
         }));
       }
+
+      return data?.user ?? null;
     } catch (error) {
       console.error(error);
     }
@@ -126,7 +130,7 @@ export const ApiCallProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('profile')
-        .select()
+        .select('*, role (role_type)')
         .single()
         .eq('user_uuid', mainData.user.data?.id);
 
@@ -286,24 +290,33 @@ export const ApiCallProvider = ({ children }) => {
 
   const addNotificationApi = async (postData) => {
     try {
-      const { data, error } = await supabase
-        .from('notification')
-        .insert({
-          ...postData,
-          user_uuid: mainData.user.data?.id,
-        })
-        .select()
-        .single();
+      const response = await fetch('/api/notification/add-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postData: { ...postData },
+          user_uuid: postData?.user_uuid
+            ? postData.user_uuid
+            : mainData.user.data?.id,
+        }),
+      });
 
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        mainData.notification.data.unshift(data);
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          if (data && data.user_uuid == mainData.user.data?.id) {
+            mainData.notification.data.unshift(data);
+          }
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
@@ -348,89 +361,109 @@ export const ApiCallProvider = ({ children }) => {
 
   const getJobPostApi = async () => {
     try {
-      const { data, error } = await supabase
-        .from('job_post')
-        .select(
-          '*, job_post_validity (*), application (*, resume (*)), job_post_send_que (*, channel (*), payment_session (*)), company_profile (*)'
-        )
-        .eq('user_uuid', mainData.user.data?.id)
-        .order('id', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      setMainData((prevData) => ({
-        ...prevData,
-        jobPost: {
-          data: data,
-          isLoading: false,
+      const response = await fetch('/api/job-post/get-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      }));
+        body: JSON.stringify({
+          user_uuid: mainData.user.data?.id,
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          setMainData((prevData) => ({
+            ...prevData,
+            jobPost: {
+              data: data,
+              isLoading: false,
+            },
+          }));
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
+      }
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
   const addJobPostApi = async (postData) => {
     try {
-      const { data, error } = await supabase
-        .from('job_post')
-        .insert({
-          ...postData,
+      const response = await fetch('/api/job-post/add-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postData: { ...postData },
           user_uuid: mainData.user.data?.id,
-        })
-        .select(
-          '*, job_post_validity (*), application (*, resume (*)), job_post_send_que (*, channel (*), payment_session (*)), company_profile (*)'
-        )
-        .single();
+        }),
+      });
 
-      if (error) {
-        throw error;
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          mainData.jobPost.data.unshift(data);
+          return data;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
       }
-
-      if (data) {
-        mainData.jobPost.data.unshift(data);
-      }
-
-      return data;
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
   const editJobPostApi = async ({ postData, id }) => {
     try {
-      const { data, error } = await supabase
-        .from('job_post')
-        .update({
-          ...postData,
-        })
-        .eq('id', id)
-        .select(
-          '*, job_post_validity (*), application (*, resume (*)), job_post_send_que (*, channel (*), payment_session (*)), company_profile (*)'
-        )
-        .single();
-
-      const currentData = mainData.jobPost.data;
-      const indexToReplace = currentData.findIndex((obj) => obj.id === data.id);
-      const newData = [
-        ...currentData.slice(0, indexToReplace),
-        data,
-        ...currentData.slice(indexToReplace + 1),
-      ];
-
-      setMainData((prevData) => ({
-        ...prevData,
-        jobPost: {
-          data: newData,
-          isLoading: false,
+      const response = await fetch('/api/job-post/edit-post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      }));
+        body: JSON.stringify({
+          postData: { ...postData },
+          postId: id,
+        }),
+      });
 
-      return data;
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          const currentData = mainData.jobPost.data;
+          const indexToReplace = currentData.findIndex(
+            (obj) => obj.id === data.id
+          );
+          const newData = [
+            ...currentData.slice(0, indexToReplace),
+            data,
+            ...currentData.slice(indexToReplace + 1),
+          ];
+
+          setMainData((prevData) => ({
+            ...prevData,
+            jobPost: {
+              data: newData,
+              isLoading: false,
+            },
+          }));
+
+          return data;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
+      }
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
@@ -650,7 +683,8 @@ export const ApiCallProvider = ({ children }) => {
       const { data, error } = await supabase
         .from('application')
         .select('*, job_post (*, company_profile (*))')
-        .eq('user_uuid', mainData.user.data?.id);
+        .eq('user_uuid', mainData.user.data?.id)
+        .order('id', { ascending: false });
 
       if (error) {
         throw error;
@@ -732,21 +766,29 @@ export const ApiCallProvider = ({ children }) => {
 
   const editApplicationApi = async ({ postData, id }) => {
     try {
-      const { data, error } = await supabase
-        .from('application')
-        .update({
-          ...postData,
-        })
-        .eq('id', id)
-        .select();
+      const response = await fetch('/api/application/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postData: { ...postData },
+          postId: id,
+        }),
+      });
 
-      if (error) {
-        throw error;
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          return data.length > 0 ? data[0] : [];
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
       }
-
-      return data.length > 0 ? data[0] : [];
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
@@ -874,7 +916,7 @@ export const ApiCallProvider = ({ children }) => {
         throw error;
       }
 
-      return data.length > 0 ? data[0] : [];
+      return data.length > 0 ? data[0] : null;
     } catch (error) {
       toast.error(error.message);
     }
@@ -882,38 +924,55 @@ export const ApiCallProvider = ({ children }) => {
 
   const getResumeDetailsApi = async (postData) => {
     try {
-      const { data, error } = await supabase
-        .from('resume')
-        .select('*, profile (username)')
-        .eq('uid', postData.uid);
+      const response = await fetch('/api/profile/get-resume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: postData.uid,
+        }),
+      });
 
-      if (error) {
-        throw error;
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          return data.length > 0 ? data[0] : null;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
       }
-
-      return data.length > 0 ? data[0] : null;
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
   const getSingleCompanyProfileApi = async (postData) => {
     try {
-      const { data, error } = await supabase
-        .from('company_profile')
-        .select(
-          '*, job_post(*,  job_post_validity!inner(*), company_profile (*))'
-        )
-        .eq('uid', postData.uid)
-        .eq('job_post.job_post_validity.is_published', true);
+      const response = await fetch('/api/profile/get-company-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: postData.uid,
+        }),
+      });
 
-      if (error) {
-        throw error;
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData) {
+          const data = responseData.data;
+          return data.length > 0 ? data[0] : null;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.message);
       }
-
-      return data.length > 0 ? data[0] : null;
     } catch (error) {
-      toast.error(error.message);
+      toast.error('An error occurred while processing the request');
     }
   };
 
@@ -1053,6 +1112,27 @@ export const ApiCallProvider = ({ children }) => {
     }
   };
 
+  const addJobAlertApi = async (postData) => {
+    try {
+      const { data, error } = await supabase.from('job_alert').insert({
+        ...postData,
+      });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Email already exists.');
+          return null;
+        } else {
+          throw error;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const createStripeCustomerApi = async (postData) => {
     try {
       const response = await fetch('/api/stripe/create-customer', {
@@ -1138,7 +1218,15 @@ export const ApiCallProvider = ({ children }) => {
       if (mainData.user.data == null) {
         const userData = await getUserApi();
         if (!userData) {
-          console.log('Please login');
+          const isAuthPage = Object.values(PAGES).some(
+            (page) => page?.directory === pathname && page?.isAuth
+          );
+          if (isAuthPage) {
+            toast.error('Please login to continue.', {
+              duration: 3000,
+            });
+            router.push(PAGES.home.directory);
+          }
         }
       }
     };
@@ -1292,6 +1380,7 @@ export const ApiCallProvider = ({ children }) => {
         getApplicationApi,
         createStripeCustomerApi,
         createStripeCheckoutSessionApi,
+        addJobAlertApi,
       }}
     >
       {children}

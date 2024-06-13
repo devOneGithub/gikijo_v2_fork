@@ -41,14 +41,14 @@ const Navbar = ({ children }) => {
   };
 
   const menuConfigEmployer = {
-    company_profile: {
-      title: PAGES.company_profile.name,
-      action: () => {
-        router.push(PAGES.company_profile.directory);
-      },
-      icon: <i class="fs-5 bi-building px-2"></i>,
-      directory: PAGES.company_profile.directory,
-    },
+    // company_profile: {
+    //   title: PAGES.company_profile.name,
+    //   action: () => {
+    //     router.push(PAGES.company_profile.directory);
+    //   },
+    //   icon: <i class="fs-5 bi-building px-2"></i>,
+    //   directory: PAGES.company_profile.directory,
+    // },
     job_post: {
       title: PAGES.job_post.name,
       action: () => {
@@ -65,14 +65,14 @@ const Navbar = ({ children }) => {
       icon: <i class="fs-5 bi-people px-2"></i>,
       directory: PAGES.applicants.directory,
     },
-    channel: {
-      title: PAGES.channel.name,
-      action: () => {
-        router.push(PAGES.channel.directory);
-      },
-      icon: <i class="fs-5 bi-send-plus px-2"></i>,
-      directory: PAGES.channel.directory,
-    },
+    // channel: {
+    //   title: PAGES.channel.name,
+    //   action: () => {
+    //     router.push(PAGES.channel.directory);
+    //   },
+    //   icon: <i class="fs-5 bi-send-plus px-2"></i>,
+    //   directory: PAGES.channel.directory,
+    // },
   };
 
   const menuConfigJobSeeker = {
@@ -84,14 +84,14 @@ const Navbar = ({ children }) => {
       icon: <i class="fs-5 bi-file-earmark-arrow-up px-2"></i>,
       directory: PAGES.application.directory,
     },
-    manage_profile: {
-      title: PAGES.manage_profile.name,
-      action: () => {
-        router.push(PAGES.manage_profile.directory);
-      },
-      icon: <i class="fs-5 bi-file-earmark-person px-2"></i>,
-      directory: PAGES.manage_profile.directory,
-    },
+    // manage_profile: {
+    //   title: PAGES.manage_profile.name,
+    //   action: () => {
+    //     router.push(PAGES.manage_profile.directory);
+    //   },
+    //   icon: <i class="fs-5 bi-file-earmark-person px-2"></i>,
+    //   directory: PAGES.manage_profile.directory,
+    // },
   };
 
   const menuConfigAdmin = {
@@ -138,7 +138,12 @@ const Navbar = ({ children }) => {
               class="w-100 nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start me-auto"
               id="menu"
             >
-              <li class="w-100 pb-1 border-bottom text-muted mb-3">
+              <li
+                class="w-100 pb-1 border-bottom text-muted mb-3 clickable"
+                onClick={() => {
+                  router.push(PAGES.profile.directory);
+                }}
+              >
                 <div class="py-2 px-0" href="/settings">
                   <i class="fs-5 bi-person-circle px-2"></i>{' '}
                   <span class="d-none d-sm-inline text-truncate">

@@ -5,15 +5,15 @@ import JobDetails from '../components/JobDetails';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { useApiCall } from '../context/apiCall';
 import { useTempData } from '../context/tempData';
-import { PAGES } from '../utils/constants';
+import { PAGES, STAGGER_CHILD_VARIANTS } from '../utils/constants';
 import Breadcrumb from '../components/BreadCrumb';
 import { useModal } from '../context/modal';
+import AnimatedComponent from '../components/AnimatedComponent';
 
 const main = () => {
   const initialized = useRef(false);
   const { apiData } = useApiCall();
   const { tempData, setValueTempData } = useTempData();
-  const [selectedJob, setSelectedJob] = useState(null);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const { isModalOpen, toggleModal } = useModal();
 
@@ -54,13 +54,17 @@ const main = () => {
               class="mb-3 sticky-top sticky-top-padding"
               style={{ zIndex: 1 }}
             >
-              <div class="row">
-                <div class="col">
-                  <div class="card vh-100">
-                    <JobDetails item={selectedJob} />
+              <AnimatedComponent
+                stageIndex={tempData?.selectedItem?.jobDetails?.id}
+              >
+                <div class="row">
+                  <div class="col">
+                    <div class="card vh-100">
+                      <JobDetails />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </AnimatedComponent>
             </div>
           </div>
         </div>
@@ -73,7 +77,7 @@ const main = () => {
         >
           <Offcanvas.Header closeButton></Offcanvas.Header>
           <Offcanvas.Body>
-            <JobDetails item={selectedJob} />
+            <JobDetails />
           </Offcanvas.Body>
         </Offcanvas>
       </section>

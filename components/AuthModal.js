@@ -73,7 +73,33 @@ const AuthModal = ({ show, setShow }) => {
 
     if (data?.id) {
       toggleModal('auth');
-      router.push(PAGES.dashboard.directory);
+      router.push(PAGES.profile.directory);
+    } else {
+      setTimeout(() => {
+        toast(
+          (t) => (
+            <span>
+              If you joined us before Jun 1, 2024,{' '}
+              <b>please reset your password</b> to maintain access after our
+              recent security upgrade.{' '}
+              <div class="mt-2 text-end">
+                <GlobalButton
+                  btnType="button"
+                  btnClass="btn btn-primary btn-sm flex-grow-1"
+                  btnTitle="Reset Password"
+                  btnOnClick={() => {
+                    toggleModal('forgotPassword');
+                    toast.dismiss(t.id);
+                  }}
+                />
+              </div>
+            </span>
+          ),
+          {
+            duration: 15000,
+          }
+        );
+      }, 2000);
     }
 
     setButtonConfig({

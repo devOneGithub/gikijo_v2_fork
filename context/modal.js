@@ -7,6 +7,7 @@ export const useModal = () => useContext(ModalContext);
 
 export const ModalProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState({
+    news: false,
     auth: false,
     forgotPassword: false,
     logout: false,

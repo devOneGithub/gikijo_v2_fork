@@ -17,6 +17,7 @@ import ApplyJobModal from '../components/ApplyJobModal';
 import JobPostModal from '../components/JobPostModal';
 import CompanyProfileModal from '../components/CompanyProfileModal';
 import SendHistoryModal from '../components/SendHistoryModal';
+import NewsModal from '../components/NewsModal';
 
 export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function MyApp({ Component, pageProps }) {
         <ModalProvider>
           <NavBar />
           <Toaster position="top-right" />
+          <NewsModal />
           <AuthModal />
           <LogoutModal />
           <ApplyJobModal />

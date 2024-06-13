@@ -269,12 +269,8 @@ const JobPostModal = () => {
         });
 
         if (resultEdit) {
-          setToggleAnimation(true);
-          setValueTempData('selectedItem', {
-            ...tempData.selectedItem,
-            editJobDetails: resultEdit,
-            publishModalConfigType: 'share',
-          });
+          handleClose();
+          toast.success('Save!');
         }
       } else {
         const resultAdd = await addJobPostApi({
@@ -325,6 +321,11 @@ const JobPostModal = () => {
 
   const onSubmitShare = async (event) => {
     event.preventDefault();
+
+    if (!jobData?.job_post_validity?.is_published) {
+      toast.error('Please publish your job post and try again.');
+      return;
+    }
 
     setButtonConfig((prevConfig) => ({
       ...prevConfig,
@@ -586,22 +587,29 @@ const JobPostModal = () => {
       footer: (
         <>
           {jobData ? (
-            <GlobalButton
-              btnType="button"
-              btnClass="btn btn-danger btn-lg"
-              btnTitle="Delete"
-              btnLoading={buttonConfig.delete.isLoading}
-              btnOnClick={onDeleteJobPost}
-            />
+            <>
+              <GlobalButton
+                btnType="button"
+                btnClass="btn btn-danger btn-lg"
+                btnTitle="Delete"
+                btnLoading={buttonConfig.delete.isLoading}
+                btnOnClick={onDeleteJobPost}
+              />
+              <GlobalButton
+                btnType="submit"
+                btnClass="btn btn-primary btn-lg"
+                btnTitle="Save"
+                btnLoading={buttonConfig.submit.isLoading}
+              />
+            </>
           ) : (
-            ''
+            <GlobalButton
+              btnType="submit"
+              btnClass="btn btn-primary btn-lg"
+              btnTitle="Save & Publish"
+              btnLoading={buttonConfig.submit.isLoading}
+            />
           )}
-          <GlobalButton
-            btnType="submit"
-            btnClass="btn btn-primary btn-lg"
-            btnTitle="Save & Publish"
-            btnLoading={buttonConfig.submit.isLoading}
-          />
         </>
       ),
     },
@@ -622,23 +630,12 @@ const JobPostModal = () => {
                       // );
                     }}
                   >
-                    <JobCard
-                      item={jobData}
-                      displayOnly={true}
-                      isPublished="publish"
-                    />
+                    <JobCard item={jobData} displayOnly={true} />
                   </div>
                 ) : (
                   ''
                 )}
 
-                <div class="alert alert-success small" role="alert">
-                  <span>
-                    <i class="bi bi-broadcast me-1"></i> Your post is now
-                    published on Gikijo. To get more views, send it to our
-                    suggested channels.
-                  </span>
-                </div>
                 <h5 class="mt-3">Send to</h5>
                 <ul class="list-group list-group-flush mt-3">
                   {apiData.allChannel.data?.map((item, index) => {
@@ -740,7 +737,11 @@ const JobPostModal = () => {
           <div class="col d-flex justify-content-end align-items-center">
             <GlobalButton
               btnType="submit"
-              btnClass="btn btn-primary btn-lg"
+              btnClass={`btn ${
+                jobData?.job_post_validity?.is_published
+                  ? 'btn-primary'
+                  : 'btn-secondary'
+              } btn-lg`}
               btnTitle="Pay & Send"
               btnLoading={buttonConfig.share.isLoading}
             />

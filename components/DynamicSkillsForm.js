@@ -65,6 +65,9 @@ function DynamicSkillsForm({ arrayElements, setArrayElements }) {
                 onChange={(e) => handleInputChange('level', index, e)}
                 required
               >
+                <option value="" disabled>
+                  Please select
+                </option>
                 {SKILL_LEVELS.map((item, index) => {
                   return (
                     <option value={item.value} key={index}>

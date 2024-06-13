@@ -45,7 +45,11 @@ const ApplyJobModal = () => {
     var success = false;
 
     const result = await applyJobPostApi({
-      postData: { job_post_id: item.id },
+      postData: {
+        job_post_id: item.id,
+        applicant_remarks: document.getElementById('input-applicant-remarks')
+          .value,
+      },
     });
 
     if (result) {
@@ -89,7 +93,7 @@ const ApplyJobModal = () => {
         }}
       >
         <Modal.Header closeButton>
-          <Modal.Title>New Application</Modal.Title>
+          <Modal.Title>Application</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div class="mb-4">
@@ -97,14 +101,14 @@ const ApplyJobModal = () => {
               <ul class="list-unstyled bg-light rounded-2 p-2 mt-2">
                 <li class="mb-2">
                   <small class="text-muted">Apply to</small>
-                  <p class="fw-bold mb-0 text-truncate">{selectedJob.title}</p>
+                  <p class="fw-bold mb-0 text-truncate">{selectedJob?.title}</p>
                   <p class="fw-bold mb-0 text-truncate">
-                    {selectedJob?.company_profile?.company_name}
+                    by {selectedJob?.company_profile?.company_name}
                   </p>
                 </li>
                 <hr />
                 <li class="mb-2">
-                  <small class="text-muted">My Profile</small>
+                  <small class="text-muted">With Profile</small>
                   <p class="fw-bold mb-0 text-truncate">
                     {resumeDetails.full_name}
                   </p>
@@ -121,27 +125,31 @@ const ApplyJobModal = () => {
                     }}
                   >
                     <strong>
-                      View all <i class="bi bi-arrow-up-right-circle ms-1"></i>
+                      more <i class="bi bi-arrow-up-right-circle ms-1"></i>
                     </strong>
                   </small>
                 </li>
               </ul>
             </div>
+            <div class="col mb-3">
+              <label htmlFor="input-applicant-remarks" class="form-label">
+                Remarks <span class="text-muted small">(optional)</span>
+              </label>
+              <textarea
+                type="text"
+                class="form-control"
+                id="input-applicant-remarks"
+                rows="3"
+                maxLength={300}
+                placeholder="What makes you the best candidate for this position?"
+              />
+            </div>
           </div>
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <GlobalButton
               btnType="button"
-              btnClass="btn btn-outline-secondary"
-              btnOnClick={() => {
-                window.open(`${PAGES.manage_profile.directory}`, '_blank');
-              }}
-            >
-              <i class="bi bi-pencil me-1"></i> Edit Profile
-            </GlobalButton>
-            <GlobalButton
-              btnType="button"
               btnClass="btn btn-primary"
-              btnTitle="Confirm, apply"
+              btnTitle="Confirm & Apply"
               btnLoading={buttonConfig.apply.isLoading}
               btnOnClick={() => {
                 onClickApply(selectedJob);

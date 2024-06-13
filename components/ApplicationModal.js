@@ -3,11 +3,12 @@ import GlobalButton from './GlobalButton';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useEffect } from 'react';
-import { APPLICATION_STATUS } from '../utils/constants';
+import { APPLICATION_STATUS, PAGES } from '../utils/constants';
 import { useApiCall } from '../context/apiCall';
 
 const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
-  const { apiData, setMainData, editApplicationApi } = useApiCall();
+  const { apiData, setMainData, editApplicationApi, addNotificationApi } =
+    useApiCall();
   const [buttonConfig, setButtonConfig] = useState({
     submit: {
       isLoading: false,
@@ -27,6 +28,7 @@ const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
         application_status: document.getElementById(
           'select-applicantion-status'
         ),
+        employer_remarks: document.getElementById('input-employer-remarks'),
       },
     };
 
@@ -38,6 +40,7 @@ const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
       for (const key in applicationData) {
         if (formConfig().application.hasOwnProperty(key)) {
           const element = formConfig().application[key];
+
           if (element?.type === 'checkbox') {
             if (applicationData[key]) {
               element.checked = true;
@@ -87,6 +90,15 @@ const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
 
     if (result) {
       success = true;
+
+      await addNotificationApi({
+        message: 'Important: Application Status Change!',
+        message_detail: `There's an update from the employer on your application status. Click here to check it out.`,
+        action_url: PAGES.application.directory,
+        action_title: 'View Status',
+        user_uuid: applicationData.applicant_uuid,
+        from_uuid: apiData.user.data?.id,
+      });
     }
 
     setButtonConfig({
@@ -98,7 +110,12 @@ const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
     });
 
     if (success) {
-      toast.success('Updated!');
+      toast.success(
+        'Status Updated!, we will notify the applicant about the latest change in their application status.',
+        {
+          duration: 6000,
+        }
+      );
       handleClose();
 
       const jobPost = apiData.jobPost.data;
@@ -114,8 +131,15 @@ const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
         );
 
         if (appIndex !== -1) {
-          jobPost[postIndex].application[appIndex].application_status =
-            newData.application_status;
+          const latestResult = jobPost[postIndex].application[appIndex];
+          if (latestResult) {
+            for (const key in latestResult) {
+              if (formConfig().application.hasOwnProperty(key)) {
+                latestResult[key] = newData[key];
+              }
+            }
+          }
+
           setMainData((prevData) => ({
             ...prevData,
             jobPost: {
@@ -141,22 +165,37 @@ const ApplicationModal = ({ toggleModal, setToggleModal, applicationData }) => {
         <form onSubmit={onSubmitApplication}>
           <Modal.Body>
             <div class="mb-3">
-              <label htmlFor="select-applicantion-status" class="form-label">
-                Application Status
-              </label>
-              <select
-                class="form-select"
-                id="select-applicantion-status"
-                required
-              >
-                {APPLICATION_STATUS.map((item, index) => {
-                  return (
-                    <option value={item.value} key={index}>
-                      {item.name}
-                    </option>
-                  );
-                })}
-              </select>
+              <div class="col mb-3">
+                <label htmlFor="select-applicantion-status" class="form-label">
+                  Application Status
+                </label>
+                <select
+                  class="form-select"
+                  id="select-applicantion-status"
+                  required
+                >
+                  {APPLICATION_STATUS.map((item, index) => {
+                    return (
+                      <option value={item.value} key={index}>
+                        {item.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div class="col mb-3">
+                <label htmlFor="input-employer-remarks" class="form-label">
+                  Remarks
+                </label>
+                <textarea
+                  type="text"
+                  class="form-control"
+                  id="input-employer-remarks"
+                  rows="3"
+                  maxLength={300}
+                  placeholder="Write additional comments or feedback for the applicant here..."
+                />
+              </div>
             </div>
           </Modal.Body>
           <Modal.Footer>

@@ -104,63 +104,6 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
     }
   }, [apiData.resume?.data]);
 
-  const onSubmitResume = async (event, keyName) => {
-    event.preventDefault();
-
-    setButtonConfig((prevState) => ({
-      ...prevState,
-      [keyName]: {
-        ...prevState[keyName],
-        submit: {
-          ...prevState[keyName].submit,
-          isLoading: true,
-        },
-      },
-    }));
-
-    const addData = formValue;
-    addData.work_experience = arrayElements.workExperience;
-    addData.education_background = arrayElements.educationBackground;
-    addData.skills = arrayElements.skills;
-    addData.languages = arrayElements.languages;
-    addData.uid = apiData.resume.data?.uid ?? null;
-
-    // Remove undefined properties
-    Object.keys(addData).forEach(
-      (key) => addData[key] === undefined && delete addData[key]
-    );
-
-    var success = false;
-
-    const result = await addResumeApi({
-      postData: addData,
-    });
-
-    if (result) {
-      success = true;
-    }
-
-    setButtonConfig((prevState) => ({
-      ...prevState,
-      [keyName]: {
-        ...prevState[keyName],
-        submit: {
-          ...prevState[keyName].submit,
-          isLoading: false,
-        },
-      },
-    }));
-
-    if (success) {
-      toast.success('Saved!');
-      if (section && onSuccessFunction) {
-        onSuccessFunction();
-      } else {
-        toggleModal('editResume');
-      }
-    }
-  };
-
   const handleChange = (field) => (event) => {
     const { value } = event.target;
     setFormValue((prevFormValue) => ({
@@ -172,6 +115,19 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
   const configForm = {
     personalDetails: {
       title: 'Personal Info',
+      inputValue: {
+        full_name: formValue.full_name,
+        email: formValue.email,
+        gender: formValue.gender,
+        date_of_birth: formValue.date_of_birth,
+        phone_number: formValue.phone_number,
+        address_1: formValue.address_1,
+        address_2: formValue.address_2,
+        city: formValue.city,
+        postcode: formValue.postcode,
+        state: formValue.state,
+        country: formValue.country,
+      },
       formView: (
         <>
           <form
@@ -217,6 +173,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                   value={formValue.gender}
                   onChange={handleChange('gender')}
                 >
+                  <option value="" disabled>
+                    Please select
+                  </option>
                   {GENDERS.map((item, index) => {
                     return (
                       <option value={item.value} key={index}>
@@ -284,6 +243,7 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                   value={formValue.city}
                   onChange={handleChange('city')}
                   placeholder="City"
+                  required
                 />
               </div>
               <div class="col-md-4">
@@ -294,6 +254,7 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                   value={formValue.postcode}
                   onChange={handleChange('postcode')}
                   placeholder="Postcode"
+                  required
                 />
               </div>
               <div class="col-md">
@@ -304,6 +265,7 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                   value={formValue.state}
                   onChange={handleChange('state')}
                   placeholder="State"
+                  required
                 />
               </div>
               <select
@@ -313,6 +275,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                 onChange={handleChange('country')}
                 required
               >
+                <option value="" disabled>
+                  Please select
+                </option>
                 {COUNTRIES.map((item, index) => {
                   return (
                     <option value={item.value} key={index}>
@@ -336,6 +301,13 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
     },
     jobDetails: {
       title: 'Job Details',
+      inputValue: {
+        current_job_status: formValue.current_job_status,
+        preferred_job: formValue.preferred_job,
+        expected_min_salary: formValue.expected_min_salary,
+        expected_max_salary: formValue.expected_max_salary,
+        expected_salary_type: formValue.expected_salary_type,
+      },
       formView: (
         <>
           <form
@@ -354,6 +326,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                 onChange={handleChange('current_job_status')}
                 required
               >
+                <option value="" disabled>
+                  Please select
+                </option>
                 {CURRENT_JOB_STATUS.map((item, index) => {
                   return (
                     <option value={item.value} key={index}>
@@ -391,6 +366,7 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                       value={formValue.expected_min_salary}
                       onChange={handleChange('expected_min_salary')}
                       placeholder="min"
+                      required
                     />
                   </div>
                 </div>
@@ -404,6 +380,7 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                       value={formValue.expected_max_salary}
                       onChange={handleChange('expected_max_salary')}
                       placeholder="max"
+                      required
                     />
                   </div>
                 </div>
@@ -413,7 +390,11 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
                     id="select-expected-salary-type"
                     value={formValue.expected_salary_type}
                     onChange={handleChange('expected_salary_type')}
+                    required
                   >
+                    <option value="" disabled>
+                      Please select
+                    </option>
                     {SALARY_TYPES.map((item, index) => {
                       return (
                         <option value={item.value} key={index}>
@@ -439,6 +420,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
     },
     workExperience: {
       title: 'Work Experience',
+      inputValue: {
+        work_experience: arrayElements.workExperience,
+      },
       formView: (
         <>
           <form
@@ -464,6 +448,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
     },
     educationHistory: {
       title: 'Education History',
+      inputValue: {
+        education_background: arrayElements.educationBackground,
+      },
       formView: (
         <>
           <form
@@ -489,6 +476,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
     },
     skills: {
       title: 'Skills',
+      inputValue: {
+        skills: arrayElements.skills,
+      },
       formView: (
         <>
           <form
@@ -514,6 +504,9 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
     },
     languages: {
       title: 'Languages',
+      inputValue: {
+        languages: arrayElements.languages,
+      },
       formView: (
         <>
           <form
@@ -537,6 +530,64 @@ const ResumeForm = ({ section = null, onSuccessFunction = null }) => {
         </>
       ),
     },
+  };
+
+  const onSubmitResume = async (event, keyName) => {
+    event.preventDefault();
+
+    setButtonConfig((prevState) => ({
+      ...prevState,
+      [keyName]: {
+        ...prevState[keyName],
+        submit: {
+          ...prevState[keyName].submit,
+          isLoading: true,
+        },
+      },
+    }));
+
+    let addData = null;
+    if (section) {
+      addData = configForm[section].inputValue;
+    } else {
+      Object.keys(configForm).forEach((key) => {
+        if (configForm[key].inputValue) {
+          addData = { ...addData, ...configForm[key].inputValue };
+        }
+      });
+    }
+
+    addData.uid = apiData.resume.data?.uid ?? null;
+
+    var success = false;
+
+    const result = await addResumeApi({
+      postData: addData,
+    });
+
+    if (result) {
+      success = true;
+    }
+
+    setButtonConfig((prevState) => ({
+      ...prevState,
+      [keyName]: {
+        ...prevState[keyName],
+        submit: {
+          ...prevState[keyName].submit,
+          isLoading: false,
+        },
+      },
+    }));
+
+    if (success) {
+      toast.success('Saved!');
+      if (section && onSuccessFunction) {
+        onSuccessFunction();
+      } else {
+        toggleModal('editResume');
+      }
+    }
   };
 
   if (section) {

@@ -16,11 +16,25 @@ import { useTempData } from '../context/tempData.js';
 import { useModal } from '../context/modal.js';
 import GlobalButton from './GlobalButton.js';
 import SendHistoryModal from './SendHistoryModal.js';
+import { useRouter } from 'next/router.js';
 
 const JobPostTable = () => {
-  const { apiData, getJobPostApi } = useApiCall();
+  const router = useRouter();
+  const { apiData, publishJobPostApi } = useApiCall();
   const { tempData, setValueTempData } = useTempData();
   const { isModalOpen, toggleModal } = useModal();
+
+  useEffect(() => {
+    if (router.query?.createPost == 'true') {
+      setTimeout(() => {
+        toggleModal('jobPost');
+        setValueTempData('selectedItem', {
+          ...tempData.selectedItem,
+          publishModalConfigType: 'create',
+        });
+      }, 1000);
+    }
+  }, [router.query]);
 
   return (
     <>
@@ -88,6 +102,17 @@ const JobPostTable = () => {
                   viewCount: job_post_validity?.view_count,
                   shareCount: job_post_validity?.share_count,
                   applicationCount: item.application?.length,
+                  actionBtnApplicant: {
+                    click: async () => {
+                      router.push(PAGES.applicants.directory);
+                    },
+                    theme: {
+                      color:
+                        item.application?.length > 0
+                          ? 'text-primary'
+                          : 'text-muted',
+                    },
+                  },
                   actionBtn: {
                     click: async () => {
                       toggleModal('jobPost');
@@ -122,9 +147,9 @@ const JobPostTable = () => {
                       ? 'badge-status-success'
                       : 'badge-status-error',
                     icon: isPublished ? (
-                      <i class="bi bi-check-circle"></i>
+                      <i class="bi bi-check-circle me-1"></i>
                     ) : (
-                      <i class="bi bi-exclamation-circle"></i>
+                      <i class="bi bi-exclamation-circle me-1"></i>
                     ),
                   },
                   // status: isPublished
@@ -132,7 +157,32 @@ const JobPostTable = () => {
                   //     publishedCount > 1 ? 'Channels' : 'Channel'
                   //   }`
                   // : 'unpublish',
-                  status: isPublished ? 'Published' : 'unpublish',
+                  status: isPublished ? 'Published' : 'Unpublish',
+                  actionBtnStatus: {
+                    click: async () => {
+                      const resultPublish = await publishJobPostApi({
+                        job_post_id: item.id,
+                        is_published: !isPublished,
+                      });
+
+                      if (resultPublish?.data?.is_published == true) {
+                        toast.success('Published!', {
+                          duration: 5000,
+                        });
+                      }
+
+                      if (resultPublish?.data?.is_published == false) {
+                        toast.success('Unpublished!', {
+                          duration: 5000,
+                        });
+                      }
+                    },
+                    icon: isPublished ? (
+                      <i class="bi bi-arrow-counterclockwise ms-1"></i>
+                    ) : (
+                      <i class="bi bi-arrow-clockwise ms-1"></i>
+                    ),
+                  },
                   viewBtn: {
                     click: () => {
                       window.open(
@@ -194,7 +244,10 @@ const JobPostTable = () => {
                           </Tooltip>
                         }
                       >
-                        <span class="text-muted">
+                        <span
+                          class={`${data.actionBtnApplicant.theme.color} clickable`}
+                          onClick={data.actionBtnApplicant.click}
+                        >
                           <i class="bi bi-people"></i>{' '}
                           {data.applicationCount ?? 0}
                         </span>
@@ -205,6 +258,12 @@ const JobPostTable = () => {
                         <span class={`badge rounded-pill ${data.theme.badge}`}>
                           {data.theme.icon} {data.status}
                         </span>
+                      </small>
+                      <small
+                        class="text-primary clickable"
+                        onClick={data.actionBtnStatus.click}
+                      >
+                        <span>{data.actionBtnStatus.icon}</span>
                       </small>
                     </td>
                     <td>
@@ -224,12 +283,18 @@ const JobPostTable = () => {
                       </span>
                     </td>
                     <td>
-                      <span
-                        class="text-primary clickable"
-                        onClick={data.viewBtn.click}
-                      >
-                        <i class="bi bi-broadcast me-1"></i> View
-                      </span>
+                      {isPublished ? (
+                        <span
+                          class="text-success clickable"
+                          onClick={data.viewBtn.click}
+                        >
+                          <i class="bi bi-broadcast me-1"></i> Live
+                        </span>
+                      ) : (
+                        <span class="text-muted">
+                          <i class="bi bi-exclamation-circle me-1"></i> Live
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );

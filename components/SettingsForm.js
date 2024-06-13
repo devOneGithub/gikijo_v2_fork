@@ -210,7 +210,7 @@ const SettingsForm = () => {
             aria-expanded="true"
             aria-controls="panelsStayOpen-collapseOne"
           >
-            <strong>My Details</strong>
+            <strong>Account Info</strong>
           </button>
         </h2>
         <div

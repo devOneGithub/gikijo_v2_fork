@@ -64,7 +64,7 @@ const ForgotPasswordModal = () => {
         }}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Forgot Password?</Modal.Title>
+          <Modal.Title>Reset Password</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={onSubmitForgotPassword}>

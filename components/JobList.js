@@ -65,7 +65,11 @@ const JobList = ({ showModalOnClick = true }) => {
       {!isEmpty && (
         <div className="col">
           {jobListData.map((item, index) => (
-            <AnimatedComponent key={index} stageIndex={index}>
+            <AnimatedComponent
+              key={index}
+              stageIndex={index}
+              animateByIndex={true}
+            >
               <div className="col mb-3">
                 <div onClick={() => handleJobCardClick(item)}>
                   <JobCard item={item} />

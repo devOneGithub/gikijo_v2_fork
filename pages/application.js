@@ -69,6 +69,7 @@ const main = () => {
                 <th scope="col"></th>
                 <th scope="col"></th>
                 <th scope="col"></th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
@@ -95,12 +96,17 @@ const main = () => {
                           status.value === item.application_action_status
                       ) || {}
                     ).name || 'Status not found',
+                  employerRemarks: item.employer_remarks,
+                  applicantRemarks: item.applicant_remarks
+                    ? item.applicant_remarks
+                    : '-',
                 };
 
                 return (
-                  <tr class="align-middle" key={index}>
+                  <tr key={index}>
                     <th
                       scope="row"
+                      class="col-4"
                       onClick={() => {
                         if (item.job_post) {
                           setToggleModal({
@@ -111,21 +117,42 @@ const main = () => {
                         }
                       }}
                     >
-                      <span class="clickable">{data.title} </span>
+                      <span class="clickable">{data.title}</span>
                       <p class="card-text fw-light">
                         <small class="text-muted">
                           {data.employmentType}
                           <i class="bi bi-dot"></i>
                           Applied {data.createdAt}
                         </small>
+                        {data.applicantRemarks ? (
+                          <>
+                            <br />
+                            <span class="text-muted small">
+                              <i class="bi bi-chat-left-text me-1"></i>{' '}
+                              {data.applicantRemarks}
+                            </span>
+                          </>
+                        ) : (
+                          ''
+                        )}
                       </p>
                     </th>
-                    <td>
+                    <td class="align-middle">
                       <small className="fw-light">Application Status</small>
                       <br />
                       {data.applicationStatusName}
                     </td>
-                    <td>
+                    <td
+                      class="align-middle"
+                      style={{ 'word-break': 'break-all' }}
+                    >
+                      <small className="fw-light">Employer Remarks</small>
+                      <br />
+                      {data.employerRemarks}
+                    </td>
+                    <td class="align-middle">
+                      <small className="fw-light">Action</small>
+                      <br />
                       <strong
                         className="text-primary fw-bold clickable"
                         onClick={() => {

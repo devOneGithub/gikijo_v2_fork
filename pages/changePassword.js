@@ -16,13 +16,6 @@ const main = () => {
         isLoading: false,
       },
     },
-
-    deleteAccount: {
-      keyName: 'deleteAccount',
-      submit: {
-        isLoading: false,
-      },
-    },
   });
 
   const formConfig = () => {
@@ -135,7 +128,6 @@ const main = () => {
               <GlobalButton
                 btnType="button"
                 btnClass="btn btn-outline-primary btn-lg me-3"
-                btnLoading={buttonConfig.changePassword.submit.isLoading}
                 btnOnClick={() => {
                   router.push(PAGES.home.directory);
                 }}
